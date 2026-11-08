@@ -72,6 +72,7 @@ struct Partida {
     Relogio relogio;
     bool pausado;
     int numeroRodada;
+    int numeroMapa;  // N de mapaN.txt, gravado no historico
     long long instanteInicioRodada;
 };
 
@@ -79,7 +80,7 @@ struct Partida {
 struct RegistroHistorico {
     std::string nome1;
     std::string nome2;
-    std::string mapa;
+    int mapa;
     int vitorias1;
     int vitorias2;
     long long segundos;

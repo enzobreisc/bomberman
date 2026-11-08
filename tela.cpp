@@ -37,7 +37,7 @@ static std::string textoJogador(const Partida* partida, int indice) {
     const Jogador& j = partida->jogadores[indice];
     return std::string(1, indice == 0 ? CEL_J1 : CEL_J2) + " " + j.nome +
            "  rodadas: " + std::to_string(j.rodadasVencidas) +
-           "  bombas: " + std::to_string(MAX_BOMBAS_JOGADOR - j.bombasAtivas) +
+           "  bombas: " + std::to_string(BOMBAS_POR_JOGADOR - j.bombasAtivas) +
            (j.vivo ? "" : "  (eliminado)");
 }
 
@@ -142,7 +142,7 @@ void mostrarComoJogar() {
               << "Jogador 1: W A S D move, F coloca bomba\n"
               << "Jogador 2: setas movem, Enter coloca bomba\n"
               << "P pausa e continua, ESC abandona (com confirmacao)\n\n"
-              << "Cada jogador pode ter " << MAX_BOMBAS_JOGADOR << " bombas ativas.\n"
+              << "Cada jogador pode ter " << BOMBAS_POR_JOGADOR << " bombas ativas.\n"
               << "A bomba explode apos " << PAVIO_MS / 1000 << " s em cruz, com alcance "
               << ALCANCE_BOMBA << ".\n"
               << "Parede (#) segura a explosao; bloco (+) e destruido.\n"
@@ -175,7 +175,7 @@ void mostrarHistorico(const RegistroHistorico* registros, int total) {
     for (int i = total - 1; i >= inicio; i--) {
         const RegistroHistorico& r = registros[i];
         std::cout << r.nome1 << " " << r.vitorias1 << " x " << r.vitorias2 << " " << r.nome2
-                  << "  | mapa: " << r.mapa << "  | " << formatarMMSS(r.segundos * 1000)
+                  << "  | mapa " << r.mapa << "  | " << formatarMMSS(r.segundos * 1000)
                   << "\n";
     }
     std::cout << "\nTotal de partidas jogadas: " << total

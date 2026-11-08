@@ -42,7 +42,7 @@ Todas ficam em `constantes.h` (nenhum valor "solto" no código).
 | `CHAMA_MS`           | 500 ms   | tempo que cada chama fica na arena            |
 | `RODADA_MS`          | 120000 ms| duração máxima de uma rodada (2 minutos)      |
 | `ALCANCE_BOMBA`      | 2        | células de alcance em cada direção            |
-| `MAX_BOMBAS_JOGADOR` | 3        | bombas ativas ao mesmo tempo por jogador      |
+| `BOMBAS_POR_JOGADOR` | 3        | bombas ativas ao mesmo tempo por jogador      |
 | `TOLERANCIA_MS`      | 100 ms   | tolerância aceita na medição do pavio         |
 | `MIN_LINHAS_COLUNAS` | 5        | tamanho mínimo de um mapa                     |
 
@@ -70,7 +70,7 @@ construtores). Não há variáveis globais.
   `bombasAtivas`; `proximoPasso` (`long long`, instante no relógio do jogo em
   que ele poderá andar de novo).
 - **Calculado, não guardado:** quantas bombas ele ainda pode colocar
-  (`MAX_BOMBAS_JOGADOR - bombasAtivas`).
+  (`BOMBAS_POR_JOGADOR - bombasAtivas`).
 - **Decisão:** `proximoPasso` por jogador faz com que um jogador parado não
   atrase o outro.
 
@@ -114,7 +114,7 @@ construtores). Não há variáveis globais.
 - **Campos:** `mapa`; `celulasIniciais` (cópia da matriz para reiniciar a
   rodada); `jogadores[2]` (sempre dois, então vetor fixo de verdade);
   `bombas` e `chamas` (`VetorDinamico`, quantidade imprevisível); `relogio`;
-  `pausado`; `numeroRodada`; `instanteInicioRodada`.
+  `pausado`; `numeroRodada`; `numeroMapa` (para o histórico); `instanteInicioRodada`.
 - **Decisão (reiniciar rodada):** guardar uma cópia do mapa em memória em vez
   de reler o arquivo. _Custo:_ uma matriz extra por partida. _Vantagem:_ regras
   não acessam arquivo e o arquivo apagado no meio da partida não quebra o jogo.
@@ -124,8 +124,10 @@ construtores). Não há variáveis globais.
 
 ### RegistroHistorico
 - **Por que existe:** uma linha do `historico.csv`.
-- **Campos:** `nome1`, `nome2`, `mapa` (`std::string`), `vitorias1`,
-  `vitorias2`, `segundos` (tempo de jogo, sem contar a pausa).
+- **Campos:** `nome1`, `nome2` (`std::string`), `mapa` (`int`, o número N do
+  `mapaN.txt`, como no exemplo do enunciado), `vitorias1`, `vitorias2`,
+  `segundos` (tempo de jogo, sem contar a pausa).
+- **Calculado, não guardado:** o título do mapa (basta abrir o `mapaN.txt`).
 
 ### VetorDinamico<T> (`vetor_dinamico.h`)
 - Controle do vetor genérico: `dados`, `quantidade`, `capacidade` (começa em 2).
@@ -159,12 +161,13 @@ construtores). Não há variáveis globais.
 | Matriz `Mapa.celulas` (`char**`)    | `carregarMapa` (mapa.cpp) | `liberarMapa`; se a leitura falha no meio, o próprio `carregarMapa` libera o que já alocou |
 | Vetor temporário `int[colunas]` (leitura formato N) | `lerLinhaMapa` | a mesma função, antes de retornar |
 | Cópia do mapa `Partida.celulasIniciais` | `iniciarPartida` (via `copiarCelulas`) | `encerrarPartida` (via `liberarCelulas`) |
-| Vetores `Partida.bombas` e `Partida.chamas` | `iniciarPartida` (`iniciarVetor`) | `encerrarPartida` (`liberarVetor`) |
+| Vetores `Partida.bombas` e `Partida.chamas` | `iniciarRodada` (`iniciarVetor`) | `encerrarRodada` (`liberarVetor`), ao fim de cada rodada; `encerrarPartida` também chama, para o caso do ESC |
 | Fila da cadeia e lista de blocos destruídos | `processarExplosoes` (vetores locais) | a mesma função, antes de retornar |
 | Vetor `bool validos[]` da lista de mapas | `escolherMapa` (menu.cpp) | a mesma função |
 | Vetor de `RegistroHistorico` | `carregarHistorico` (tamanho exato) | `liberarHistorico`, chamada em `executarHistorico` |
 
-`encerrarPartida` é chamada em todos os caminhos de saída de `executarJogar`:
+`encerrarRodada` roda ao fim de cada rodada (normal ou ESC) e `encerrarPartida`
+é chamada em todos os caminhos de saída de `executarJogar`:
 fim normal, ESC com confirmação e falha de carregamento (nesse caso o próprio
 `iniciarPartida` já não deixa nada alocado).
 
@@ -191,8 +194,9 @@ Arquivo (`mapaN.txt`): primeira linha `L C formato` (`C` = caracteres,
 - **Testes:** `make testes` roda `testes/teste_mapa.cpp` com mapas válidos e
   inválidos de `testes/mapas/` (inclusive 5x5, 25x60, CRLF, vazio e quebrados
   de cada tipo). `make vazamentos` confirma 0 vazamentos no macOS.
-- **Atenção:** `mapa1.txt` e `mapa2.txt` na raiz são **provisórios** e devem ser
-  trocados pelos exemplos fornecidos pelo professor.
+- **Formato C:** os símbolos de uma linha vêm juntos, sem separador (como no
+  enunciado); o `>>` sobre `char` também aceita separados por espaço.
+- `mapa1.txt` e `mapa2.txt` são os exemplos do enunciado (11x13, C e N).
 
 ## Regras do jogo (`regras.cpp`)
 
@@ -203,7 +207,7 @@ Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
   lento ou um jogador parado não acumula passos. Só a célula de destino é
   conferida (parede, bloco, bomba, outro jogador vivo): quem coloca a bomba pode
   sair da célula dela, mas não consegue voltar.
-- **Bomba:** no máximo `MAX_BOMBAS_JOGADOR` ativas por jogador e nunca em célula
+- **Bomba:** no máximo `BOMBAS_POR_JOGADOR` ativas por jogador e nunca em célula
   que já tem bomba. Explode quando `agoraJogo - instanteColocada >= PAVIO_MS`.
 - **Explosão em cadeia:** uma fila de índices (`VetorDinamico<int>`) recebe as
   bombas vencidas; cada bomba é marcada `explodindo` ao entrar na fila, então
@@ -223,8 +227,8 @@ Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
 ## Rodadas, partida e laço (`partida.cpp`, `laco.cpp`)
 
 - **Reiniciar a rodada:** `iniciarRodada` copia `celulasIniciais` de volta para o
-  mapa (sem reler o arquivo), zera bombas e chamas (`quantidade = 0`, sem
-  realocar) e recoloca os jogadores. O relógio do jogo **não** é zerado: o
+  mapa (sem reler o arquivo), aloca vetores novos de bombas e chamas
+  (liberados por `encerrarRodada`) e recoloca os jogadores. O relógio do jogo **não** é zerado: o
   cronômetro da rodada usa `instanteInicioRodada`, e o tempo total da partida
   para o histórico é simplesmente `agoraJogo` (sem pausas).
 - **Ordem do laço** (`executarRodada`): ler entrada, tratar abandono e pausa,
@@ -240,9 +244,8 @@ Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
   `SetConsoleCursorPosition(0,0)`, com o cursor oculto. `system("cls")` só é
   usado em trocas de tela, nunca dentro do laço.
 - **Histórico** (`historico.cpp`): `historico.csv` com
-  `nome1,nome2,mapa,vitorias1,vitorias2,segundos`. Os nomes não têm vírgula, mas
-  o título do mapa pode ter, então a linha é lida com os dois primeiros campos da
-  esquerda e os três últimos da direita. A primeira passada conta só as linhas
+  `nome1,nome2,mapa,vitorias1,vitorias2,segundos`, em que `mapa` é o número do
+  mapa (ex.: `Ana,Bruno,1,2,0,171`). A primeira passada conta só as linhas
   válidas, para alocar exatamente o necessário. Linhas inválidas são ignoradas.
 - **Menu** (`menu.cpp`, fora da lista sugerida): mantém `main` curta; lista os
   mapas pelo título (inválidos aparecem como indisponíveis com o motivo), deixa
@@ -252,8 +255,8 @@ Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
 
 | Arquivo      | Tamanho | Formato | Observação                              |
 |--------------|---------|---------|-----------------------------------------|
-| `mapa1.txt`  | 5x5     | C       | exemplo (provisório)                    |
-| `mapa2.txt`  | 5x5     | N       | exemplo (provisório)                    |
+| `mapa1.txt`  | 11x13   | C       | exemplo do enunciado                    |
+| `mapa2.txt`  | 11x13   | N       | exemplo do enunciado                    |
 | `mapa3.txt`  | 7x9     | C       | pequeno                                 |
 | `mapa4.txt`  | 17x31   | N       | grande                                  |
 | `mapa5.txt`  | 13x15   | C       | dimensão diferente de 11x13             |

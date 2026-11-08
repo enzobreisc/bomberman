@@ -40,7 +40,7 @@ bool moverJogador(Partida* partida, int indice, int dLinha, int dColuna) {
 
 bool colocarBomba(Partida* partida, int indice) {
     Jogador* j = &partida->jogadores[indice];
-    if (!j->vivo || j->bombasAtivas >= MAX_BOMBAS_JOGADOR) return false;
+    if (!j->vivo || j->bombasAtivas >= BOMBAS_POR_JOGADOR) return false;
     if (indiceBombaEm(partida, j->linha, j->coluna) >= 0) return false;
 
     Bomba b;

@@ -10,7 +10,7 @@ static void iniciarJogador(Jogador* j, const std::string& nome, int linha, int c
     j->rodadasVencidas = 0;
 }
 
-bool iniciarPartida(Partida* partida, const std::string& caminhoMapa,
+bool iniciarPartida(Partida* partida, const std::string& caminhoMapa, int numeroMapa,
                     const std::string& nome1, const std::string& nome2,
                     std::string* erro) {
     if (!carregarMapa(caminhoMapa, &partida->mapa, erro)) return false;
@@ -21,11 +21,12 @@ bool iniciarPartida(Partida* partida, const std::string& caminhoMapa,
 
     iniciarJogador(&partida->jogadores[0], nome1, linha1, coluna1);
     iniciarJogador(&partida->jogadores[1], nome2, linha2, coluna2);
-    iniciarVetor(&partida->bombas);
-    iniciarVetor(&partida->chamas);
+    partida->bombas = {nullptr, 0, 0};
+    partida->chamas = {nullptr, 0, 0};
     iniciarRelogio(&partida->relogio);
     partida->pausado = false;
     partida->numeroRodada = 0;
+    partida->numeroMapa = numeroMapa;
     partida->instanteInicioRodada = 0;
     return true;
 }
@@ -36,8 +37,10 @@ void iniciarRodada(Partida* partida) {
             partida->mapa.celulas[l][c] = partida->celulasIniciais[l][c];
         }
     }
-    partida->bombas.quantidade = 0;
-    partida->chamas.quantidade = 0;
+    liberarVetor(&partida->bombas);
+    liberarVetor(&partida->chamas);
+    iniciarVetor(&partida->bombas);
+    iniciarVetor(&partida->chamas);
 
     for (int i = 0; i < 2; i++) {
         Jogador* j = &partida->jogadores[i];
@@ -54,9 +57,13 @@ void iniciarRodada(Partida* partida) {
     reiniciarCiclo(&partida->relogio);
 }
 
-void encerrarPartida(Partida* partida) {
+void encerrarRodada(Partida* partida) {
     liberarVetor(&partida->bombas);
     liberarVetor(&partida->chamas);
+}
+
+void encerrarPartida(Partida* partida) {
+    encerrarRodada(partida);
     liberarCelulas(partida->celulasIniciais, partida->mapa.linhas);
     partida->celulasIniciais = nullptr;
     liberarMapa(&partida->mapa);
@@ -76,7 +83,7 @@ RegistroHistorico criarRegistro(const Partida& partida) {
     RegistroHistorico r;
     r.nome1 = partida.jogadores[0].nome;
     r.nome2 = partida.jogadores[1].nome;
-    r.mapa = partida.mapa.titulo;
+    r.mapa = partida.numeroMapa;
     r.vitorias1 = partida.jogadores[0].rodadasVencidas;
     r.vitorias2 = partida.jogadores[1].rodadasVencidas;
     r.segundos = partida.relogio.agoraJogo / 1000;

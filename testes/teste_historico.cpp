@@ -29,17 +29,17 @@ int main() {
     VERIFICA(carregarHistorico(&regs, &total, &erro) && total == 0 && regs == nullptr);
 
     for (int i = 1; i <= 12; i++) {
-        RegistroHistorico r = {"ana", "bia", "Mapa, com virgula", i % 3, 2, 100 + i};
+        RegistroHistorico r = {"ana", "bia", 3, i % 3, 2, 100 + i};
         VERIFICA(gravarRegistro(r, &erro));
     }
     {
         std::ofstream lixo("historico.csv", std::ios::app);
-        lixo << "lixo\n,,\nana,bia,mapa,x,1,2\nana,bia,mapa,1,2\n"
-             << "nomemuitogrande,bia,mapa,1,2,3\nana,bia,,1,2,3\n\n";
+        lixo << "lixo\n,,\nana,bia,1,x,1,2\nana,bia,1,1,2\n"
+             << "nomemuitogrande,bia,1,1,2,3\nana,bia,,1,2,3\nana,bia,1,1,2,3,4\n\n";
     }
     VERIFICA(carregarHistorico(&regs, &total, &erro));
     VERIFICA(total == 12);
-    VERIFICA(regs[0].mapa == "Mapa, com virgula" && regs[0].segundos == 101);
+    VERIFICA(regs[0].mapa == 3 && regs[0].segundos == 101);
     VERIFICA(regs[11].segundos == 112 && regs[11].vitorias2 == 2);
     liberarHistorico(&regs, &total);
     VERIFICA(regs == nullptr && total == 0);

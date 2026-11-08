@@ -11,7 +11,7 @@ constexpr long long TOLERANCIA_MS = 100;
 
 // Regras
 constexpr int ALCANCE_BOMBA       = 2;
-constexpr int MAX_BOMBAS_JOGADOR  = 3;
+constexpr int BOMBAS_POR_JOGADOR  = 3;
 constexpr int RODADAS_PARTIDA     = 3;
 constexpr int RODADAS_PARA_VENCER = 2;
 

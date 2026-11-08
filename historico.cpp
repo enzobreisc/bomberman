@@ -31,38 +31,40 @@ static bool lerNumero(const std::string& texto, long long* valor) {
     return true;
 }
 
-// Os nomes nao tem virgula, mas o titulo do mapa pode ter: por isso os dois
-// primeiros campos vem da esquerda e os tres ultimos da direita.
+// nome1,nome2,mapa,vitorias1,vitorias2,segundos
 static bool interpretarLinha(std::string linha, RegistroHistorico* registro) {
     while (!linha.empty() && (linha.back() == '\r' || linha.back() == ' ')) linha.pop_back();
 
-    size_t v1 = linha.find(',');
-    if (v1 == std::string::npos) return false;
-    size_t v2 = linha.find(',', v1 + 1);
-    if (v2 == std::string::npos) return false;
-    size_t v5 = linha.rfind(',');
-    size_t v4 = v5 == 0 ? std::string::npos : linha.rfind(',', v5 - 1);
-    size_t v3 = v4 == 0 || v4 == std::string::npos ? std::string::npos
-                                                   : linha.rfind(',', v4 - 1);
-    if (v3 == std::string::npos || v3 <= v2) return false;
+    std::string campos[6];
+    int quantidade = 0;
+    size_t inicio = 0;
+    while (true) {
+        size_t virgula = linha.find(',', inicio);
+        if (quantidade == 6) return false;
+        if (virgula == std::string::npos) {
+            campos[quantidade++] = linha.substr(inicio);
+            break;
+        }
+        campos[quantidade++] = linha.substr(inicio, virgula - inicio);
+        inicio = virgula + 1;
+    }
+    if (quantidade != 6) return false;
 
-    long long vitorias1, vitorias2, segundos;
-    if (!lerNumero(linha.substr(v3 + 1, v4 - v3 - 1), &vitorias1)) return false;
-    if (!lerNumero(linha.substr(v4 + 1, v5 - v4 - 1), &vitorias2)) return false;
-    if (!lerNumero(linha.substr(v5 + 1), &segundos)) return false;
-
-    std::string nome1 = linha.substr(0, v1);
-    std::string nome2 = linha.substr(v1 + 1, v2 - v1 - 1);
-    std::string mapa = linha.substr(v2 + 1, v3 - v2 - 1);
+    long long mapa, vitorias1, vitorias2, segundos;
+    if (!lerNumero(campos[2], &mapa) || !lerNumero(campos[3], &vitorias1) ||
+        !lerNumero(campos[4], &vitorias2) || !lerNumero(campos[5], &segundos)) {
+        return false;
+    }
     int maximo = TAM_NOME_JOGADOR;
-    if (nome1.empty() || nome2.empty() || mapa.empty()) return false;
-    if (static_cast<int>(nome1.size()) > maximo || static_cast<int>(nome2.size()) > maximo) {
+    if (campos[0].empty() || campos[1].empty()) return false;
+    if (static_cast<int>(campos[0].size()) > maximo ||
+        static_cast<int>(campos[1].size()) > maximo) {
         return false;
     }
 
-    registro->nome1 = nome1;
-    registro->nome2 = nome2;
-    registro->mapa = mapa;
+    registro->nome1 = campos[0];
+    registro->nome2 = campos[1];
+    registro->mapa = static_cast<int>(mapa);
     registro->vitorias1 = static_cast<int>(vitorias1);
     registro->vitorias2 = static_cast<int>(vitorias2);
     registro->segundos = segundos;

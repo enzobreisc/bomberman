@@ -116,7 +116,7 @@ void executarJogar() {
 
     Partida partida;
     std::string erro;
-    if (!iniciarPartida(&partida, nomeArquivoMapa(numero), nome1, nome2, &erro)) {
+    if (!iniciarPartida(&partida, nomeArquivoMapa(numero), numero, nome1, nome2, &erro)) {
         mostrarMensagem("Nao foi possivel carregar o mapa: " + erro);
         mostrarMensagem("Pressione ENTER para voltar.");
         std::string espera;

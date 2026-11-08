@@ -6,14 +6,18 @@
 
 // Carrega o mapa e aloca tudo que a partida usa. Em caso de erro devolve false,
 // escreve o motivo em 'erro' e nao deixa nada alocado.
-bool iniciarPartida(Partida* partida, const std::string& caminhoMapa,
+bool iniciarPartida(Partida* partida, const std::string& caminhoMapa, int numeroMapa,
                     const std::string& nome1, const std::string& nome2,
                     std::string* erro);
 
-// Volta o mapa ao estado inicial, descarta bombas e chamas e recoloca os jogadores.
+// Volta o mapa ao estado inicial, aloca bombas e chamas novos e recoloca os jogadores.
 void iniciarRodada(Partida* partida);
 
-// Libera tudo que iniciarPartida alocou. Serve para fim normal e abandono.
+// Libera o que a rodada alocou (vetores de bombas e chamas).
+void encerrarRodada(Partida* partida);
+
+// Libera tudo que a partida alocou (inclui a rodada, se ainda aberta).
+// Serve para fim normal e abandono.
 void encerrarPartida(Partida* partida);
 
 // Computa o resultado da rodada nos placares.

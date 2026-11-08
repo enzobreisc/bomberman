@@ -63,7 +63,9 @@ bool jogarPartida(Partida* partida) {
         limparTela();
 
         int resultado = RODADA_EMPATE;
-        if (!executarRodada(partida, &resultado)) {
+        bool terminouNormal = executarRodada(partida, &resultado);
+        encerrarRodada(partida);
+        if (!terminouNormal) {
             concluida = false;
             break;
         }

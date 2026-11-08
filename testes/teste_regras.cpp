@@ -15,7 +15,7 @@ static int falhas = 0;
 
 static void iniciar(Partida* p) {
     std::string erro;
-    bool ok = iniciarPartida(p, "testes/regras/mapa_7x9.txt", "ana", "bia", &erro);
+    bool ok = iniciarPartida(p, "testes/regras/mapa_7x9.txt", 1, "ana", "bia", &erro);
     if (!ok) {
         std::cout << "nao abriu o mapa de teste: " << erro << "\n";
         falhas++;
@@ -77,7 +77,7 @@ static void testarBombas() {
     VERIFICA(colocarBomba(&p, 0));
     posicionar(&p, 0, 3, 6);
     VERIFICA(!colocarBomba(&p, 0));                        // limite de 3
-    VERIFICA(p.jogadores[0].bombasAtivas == MAX_BOMBAS_JOGADOR);
+    VERIFICA(p.jogadores[0].bombasAtivas == BOMBAS_POR_JOGADOR);
 
     // Pode sair da celula da propria bomba, mas nao voltar.
     posicionar(&p, 0, 3, 3);
