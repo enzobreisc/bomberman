@@ -11,11 +11,20 @@ C++ para console do Windows (`conio.h` e `windows.h`), sem bibliotecas gráficas
 
 ## (a) Como compilar e executar
 
+## Estrutura de pastas
+
+```
+src/      código do jogo (.h e .cpp)
+testes/   testes portáveis, mapas de teste e declarações falsas do Windows
+mapaN.txt mapas (na raiz, a pasta de execução)
+README.md, Makefile
+```
+
 O jogo usa `conio.h` e `windows.h`, então compila no Windows (g++/MinGW), na
 pasta do projeto (onde ficam os `mapaN.txt`):
 
 ```
-g++ -std=c++17 -o bomberman.exe main.cpp menu.cpp laco.cpp partida.cpp regras.cpp mapa.cpp tempo.cpp tela.cpp entrada.cpp historico.cpp
+g++ -std=c++17 -o bomberman.exe src/*.cpp
 bomberman.exe
 ```
 

@@ -1,7 +1,7 @@
 // Etapas 6 e 7: movimento, bombas, explosao, cadeia, chamas e mortes.
 #include <iostream>
-#include "../partida.h"
-#include "../regras.h"
+#include "../src/partida.h"
+#include "../src/regras.h"
 
 static int falhas = 0;
 
