@@ -11,12 +11,23 @@ C++ para console do Windows (`conio.h` e `windows.h`), sem bibliotecas gráficas
 
 ## (a) Como compilar e executar
 
-_(pendente: comandos finais do jogo completo — Etapa 11/12)_
+O jogo usa `conio.h` e `windows.h`, então compila no Windows (g++/MinGW), na
+pasta do projeto (onde ficam os `mapaN.txt`):
 
-Etapas já prontas (testes portáveis, rodam também fora do Windows):
+```
+g++ -std=c++17 -o bomberman.exe main.cpp menu.cpp laco.cpp partida.cpp regras.cpp mapa.cpp tempo.cpp tela.cpp entrada.cpp historico.cpp
+bomberman.exe
+```
+
+O `historico.csv` é criado na pasta em que o jogo é executado.
+
+Testes das regras, mapas, relógio, vetor e histórico (portáveis, rodam também
+fora do Windows) e conferência de sintaxe do jogo completo com declarações
+falsas de `windows.h`/`conio.h`:
 
 ```
 make testes
+make verificar-windows
 ```
 
 ## (b) Intervalos de tempo e constantes
@@ -86,6 +97,17 @@ construtores). Não há variáveis globais.
   _Alternativa descartada:_ guardar `time_point` do `steady_clock` em cada
   bomba (a pausa exigiria corrigir todos os instantes).
 
+### Acoes e EstadoTeclas
+- **Por que existem:** `lerAcoes` só lê o teclado e preenche `Acoes` (direção
+  desejada de cada jogador, pedido de bomba, pausa e abandono); as regras é que
+  decidem o que fazer. `EstadoTeclas` guarda o estado anterior das teclas para
+  detectar o instante em que são apertadas (bomba, P e ESC acontecem uma vez por
+  aperto).
+- **Decisão:** o estado anterior fica numa struct local passada por ponteiro, e
+  não numa variável `static`, porque variáveis globais/estáticas são proibidas.
+- **Direção:** `-1`, `0` ou `1` em cada eixo, então movimento diagonal não
+  existe (vertical tem prioridade) e teclas opostas se anulam.
+
 ### Partida
 - **Por que existe:** reúne o estado de uma partida para ser passada por
   ponteiro (`partida->`) às sub-rotinas.
@@ -136,8 +158,15 @@ construtores). Não há variáveis globais.
 | `VetorDinamico<T>` (bombas, chamas) | `iniciarVetor`, `crescerVetor` | `liberarVetor` |
 | Matriz `Mapa.celulas` (`char**`)    | `carregarMapa` (mapa.cpp) | `liberarMapa`; se a leitura falha no meio, o próprio `carregarMapa` libera o que já alocou |
 | Vetor temporário `int[colunas]` (leitura formato N) | `lerLinhaMapa` | a mesma função, antes de retornar |
+| Cópia do mapa `Partida.celulasIniciais` | `iniciarPartida` (via `copiarCelulas`) | `encerrarPartida` (via `liberarCelulas`) |
+| Vetores `Partida.bombas` e `Partida.chamas` | `iniciarPartida` (`iniciarVetor`) | `encerrarPartida` (`liberarVetor`) |
+| Fila da cadeia e lista de blocos destruídos | `processarExplosoes` (vetores locais) | a mesma função, antes de retornar |
+| Vetor `bool validos[]` da lista de mapas | `escolherMapa` (menu.cpp) | a mesma função |
+| Vetor de `RegistroHistorico` | `carregarHistorico` (tamanho exato) | `liberarHistorico`, chamada em `executarHistorico` |
 
-_(a tabela é completada a cada etapa)_
+`encerrarPartida` é chamada em todos os caminhos de saída de `executarJogar`:
+fim normal, ESC com confirmação e falha de carregamento (nesse caso o próprio
+`iniciarPartida` já não deixa nada alocado).
 
 ## (e) Leitura dos dois formatos de mapa
 
@@ -164,6 +193,73 @@ Arquivo (`mapaN.txt`): primeira linha `L C formato` (`C` = caracteres,
   de cada tipo). `make vazamentos` confirma 0 vazamentos no macOS.
 - **Atenção:** `mapa1.txt` e `mapa2.txt` na raiz são **provisórios** e devem ser
   trocados pelos exemplos fornecidos pelo professor.
+
+## Regras do jogo (`regras.cpp`)
+
+Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
+
+- **Passo:** só anda se `agoraJogo >= proximoPasso` do próprio jogador; ao andar,
+  `proximoPasso = agoraJogo + PASSO_MS` (e não `+= PASSO_MS`), então um ciclo
+  lento ou um jogador parado não acumula passos. Só a célula de destino é
+  conferida (parede, bloco, bomba, outro jogador vivo): quem coloca a bomba pode
+  sair da célula dela, mas não consegue voltar.
+- **Bomba:** no máximo `MAX_BOMBAS_JOGADOR` ativas por jogador e nunca em célula
+  que já tem bomba. Explode quando `agoraJogo - instanteColocada >= PAVIO_MS`.
+- **Explosão em cadeia:** uma fila de índices (`VetorDinamico<int>`) recebe as
+  bombas vencidas; cada bomba é marcada `explodindo` ao entrar na fila, então
+  nunca explode duas vezes. A fila cresce enquanto é percorrida (por isso o laço
+  usa índice). As bombas só são removidas do vetor depois da cadeia, de trás
+  para frente, porque a remoção troca com o último elemento.
+- **Blocos:** um bloco atingido interrompe a explosão naquela direção e só vira
+  vazio depois da cadeia inteira, para o resultado não depender da ordem em que
+  as bombas são processadas. Parede não é atingida.
+- **Chamas:** cada célula atingida ganha uma chama de `CHAMA_MS`; se já havia uma,
+  só renova o fim. _Decisão:_ a célula de um bloco destruído pode ser pisada
+  durante as chamas, mas quem entra numa chama morre.
+- **Morte:** depois de mover e explodir, quem está em célula com chama morre.
+- **Fim da rodada:** `avaliarRodada` devolve o índice do sobrevivente, empate
+  (mortes simultâneas ou tempo esgotado) ou "em andamento".
+
+## Rodadas, partida e laço (`partida.cpp`, `laco.cpp`)
+
+- **Reiniciar a rodada:** `iniciarRodada` copia `celulasIniciais` de volta para o
+  mapa (sem reler o arquivo), zera bombas e chamas (`quantidade = 0`, sem
+  realocar) e recoloca os jogadores. O relógio do jogo **não** é zerado: o
+  cronômetro da rodada usa `instanteInicioRodada`, e o tempo total da partida
+  para o histórico é simplesmente `agoraJogo` (sem pausas).
+- **Ordem do laço** (`executarRodada`): ler entrada, tratar abandono e pausa,
+  atualizar relógio, mover/colocar bombas, explodir, apagar chamas, matar,
+  verificar fim da rodada, desenhar e completar os 33 ms.
+- **Telas bloqueantes** (confirmação do ESC, resultados): depois delas
+  `reiniciarCiclo` descarta o tempo real gasto esperando o jogador, senão a
+  próxima atualização do relógio somaria esse tempo de uma vez.
+- **Abandono (ESC):** pede confirmação; se confirmar, a partida não é gravada no
+  histórico. Fim de partida: 2 rodadas vencidas ou 3 rodadas disputadas.
+- **Tela** (`tela.cpp`): cada quadro é montado em uma `std::string` (uma letra
+  por célula, linhas completadas com espaços) e impresso de uma vez após
+  `SetConsoleCursorPosition(0,0)`, com o cursor oculto. `system("cls")` só é
+  usado em trocas de tela, nunca dentro do laço.
+- **Histórico** (`historico.cpp`): `historico.csv` com
+  `nome1,nome2,mapa,vitorias1,vitorias2,segundos`. Os nomes não têm vírgula, mas
+  o título do mapa pode ter, então a linha é lida com os dois primeiros campos da
+  esquerda e os três últimos da direita. A primeira passada conta só as linhas
+  válidas, para alocar exatamente o necessário. Linhas inválidas são ignoradas.
+- **Menu** (`menu.cpp`, fora da lista sugerida): mantém `main` curta; lista os
+  mapas pelo título (inválidos aparecem como indisponíveis com o motivo), deixa
+  escolher ou sortear e valida os nomes.
+
+## Mapas
+
+| Arquivo      | Tamanho | Formato | Observação                              |
+|--------------|---------|---------|-----------------------------------------|
+| `mapa1.txt`  | 5x5     | C       | exemplo (provisório)                    |
+| `mapa2.txt`  | 5x5     | N       | exemplo (provisório)                    |
+| `mapa3.txt`  | 7x9     | C       | pequeno                                 |
+| `mapa4.txt`  | 17x31   | N       | grande                                  |
+| `mapa5.txt`  | 13x15   | C       | dimensão diferente de 11x13             |
+
+Os mapas autorais têm simetria de ponto (rotação de 180°) e cada jogador começa
+com 3 células livres ao redor, então as chances são iguais.
 
 ## (f) Desafios extras
 
