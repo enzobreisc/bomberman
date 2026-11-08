@@ -153,10 +153,10 @@ void mostrarComoJogar() {
 void mostrarSobre() {
     limparTela();
     std::cout << "SOBRE\n\n"
-              << "Integrantes: [preencher nomes do trio]\n"
-              << "Data: [preencher mes/ano]\n"
+              << "Integrantes: Enzo Breischatt, Bruno Naressi, [terceiro integrante]\n"
+              << "Data: 11/2026\n"
               << "Disciplina: Algoritmos e Programacao II (22817)\n"
-              << "Professor: [preencher]\n\n"
+              << "Professor: Thiago Felski\n\n"
               << "Pressione uma tecla para voltar...\n" << std::flush;
 }
 

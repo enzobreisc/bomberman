@@ -283,4 +283,8 @@ Nenhum implementado até o momento.
 
 ## Integrantes
 
-_(pendente: nomes, mês/ano e professor/disciplina)_
+- Enzo Breischatt
+- Bruno Naressi
+- _(pendente: terceiro integrante)_
+
+Novembro/2026 — Professor Thiago Felski — Algoritmos e Programação II (22817).
