@@ -1,6 +1,6 @@
-#include "regras.h"
-#include "constantes.h"
-#include "tempo.h"
+#include "jogo/regras.h"
+#include "dados/constantes.h"
+#include "jogo/tempo.h"
 
 static bool dentroDoMapa(const Mapa& mapa, int linha, int coluna) {
     return linha >= 0 && linha < mapa.linhas && coluna >= 0 && coluna < mapa.colunas;

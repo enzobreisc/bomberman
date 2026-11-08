@@ -1,5 +1,5 @@
-#include "menu.h"
-#include "tela.h"
+#include "interface/menu.h"
+#include "interface/tela.h"
 
 int main() {
     bool continuar = true;

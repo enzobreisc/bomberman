@@ -1,9 +1,9 @@
-#include "tela.h"
+#include "interface/tela.h"
 #include <cstdlib>
 #include <iostream>
 #include <windows.h>
-#include "constantes.h"
-#include "tempo.h"
+#include "dados/constantes.h"
+#include "jogo/tempo.h"
 
 static const size_t LARGURA_MINIMA = 79;
 

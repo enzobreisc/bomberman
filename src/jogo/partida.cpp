@@ -1,7 +1,7 @@
-#include "partida.h"
-#include "constantes.h"
-#include "mapa.h"
-#include "tempo.h"
+#include "jogo/partida.h"
+#include "dados/constantes.h"
+#include "arquivos/mapa.h"
+#include "jogo/tempo.h"
 
 static void iniciarJogador(Jogador* j, const std::string& nome, int linha, int coluna) {
     j->nome = nome;

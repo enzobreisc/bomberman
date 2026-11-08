@@ -2,7 +2,7 @@
 #define TEMPO_H
 
 #include <string>
-#include "estruturas.h"
+#include "dados/estruturas.h"
 
 void iniciarRelogio(Relogio* relogio);
 

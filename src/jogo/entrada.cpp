@@ -1,4 +1,4 @@
-#include "entrada.h"
+#include "jogo/entrada.h"
 #include <cctype>
 #include <conio.h>
 #include <windows.h>

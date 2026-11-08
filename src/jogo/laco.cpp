@@ -1,10 +1,10 @@
-#include "laco.h"
-#include "constantes.h"
-#include "entrada.h"
-#include "partida.h"
-#include "regras.h"
-#include "tela.h"
-#include "tempo.h"
+#include "jogo/laco.h"
+#include "dados/constantes.h"
+#include "jogo/entrada.h"
+#include "jogo/partida.h"
+#include "jogo/regras.h"
+#include "interface/tela.h"
+#include "jogo/tempo.h"
 
 static void aplicarAcoes(Partida* partida, const Acoes& acoes) {
     for (int i = 0; i < 2; i++) {

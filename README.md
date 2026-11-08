@@ -14,9 +14,13 @@ C++ para console do Windows (`conio.h` e `windows.h`), sem bibliotecas gráficas
 ## Estrutura de pastas
 
 ```
-src/      código do jogo (.h e .cpp)
-testes/   testes portáveis, mapas de teste e declarações falsas do Windows
-mapaN.txt mapas (na raiz, a pasta de execução)
+src/main.cpp
+src/dados/       constantes, structs e vetor dinâmico (template)
+src/jogo/        regras, partida, laço, relógio e teclado
+src/arquivos/    leitura de mapas e histórico.csv
+src/interface/   tela e menu
+testes/          testes portáveis, mapas de teste e declarações falsas do Windows
+mapaN.txt        mapas (na raiz, a pasta de execução)
 README.md, Makefile
 ```
 
@@ -24,7 +28,7 @@ O jogo usa `conio.h` e `windows.h`, então compila no Windows (g++/MinGW), na
 pasta do projeto (onde ficam os `mapaN.txt`):
 
 ```
-g++ -std=c++17 -o bomberman.exe src/*.cpp
+g++ -std=c++17 -Isrc -o bomberman.exe src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
 bomberman.exe
 ```
 
