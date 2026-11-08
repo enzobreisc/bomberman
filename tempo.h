@@ -10,6 +10,9 @@ void iniciarRelogio(Relogio* relogio);
 // exceto se estiver pausado.
 void atualizarRelogio(Relogio* relogio, bool pausado);
 
+// Descarta o tempo real gasto fora do jogo (telas de confirmacao e resultado).
+void reiniciarCiclo(Relogio* relogio);
+
 // Espera o que falta para completar CICLO_MS (unico lugar que dorme).
 void completarCiclo(const Relogio& relogio);
 

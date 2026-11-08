@@ -18,6 +18,10 @@ void atualizarRelogio(Relogio* relogio, bool pausado) {
     relogio->inicioCiclo = agora;
 }
 
+void reiniciarCiclo(Relogio* relogio) {
+    relogio->inicioCiclo = relogio_real::now();
+}
+
 void completarCiclo(const Relogio& relogio) {
     relogio_real::time_point alvo = relogio.inicioCiclo +
                                     std::chrono::milliseconds(CICLO_MS);

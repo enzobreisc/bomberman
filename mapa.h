@@ -16,6 +16,10 @@ bool carregarMapa(const std::string& caminho, Mapa* mapa, std::string* erro);
 
 void liberarMapa(Mapa* mapa);
 
+// Matriz nova com o mesmo conteudo de mapa.celulas; liberar com liberarCelulas.
+char** copiarCelulas(const Mapa& mapa);
+void liberarCelulas(char** celulas, int linhas);
+
 // Devolve as posicoes de '1' e '2' e troca esses simbolos por celula vazia.
 void extrairPosicoesIniciais(Mapa* mapa, int* linha1, int* coluna1,
                              int* linha2, int* coluna2);

@@ -97,11 +97,23 @@ static bool validarConteudo(const Mapa& mapa, std::string* erro) {
     return true;
 }
 
-void liberarMapa(Mapa* mapa) {
-    if (mapa->celulas != nullptr) {
-        for (int l = 0; l < mapa->linhas; l++) delete[] mapa->celulas[l];
-        delete[] mapa->celulas;
+void liberarCelulas(char** celulas, int linhas) {
+    if (celulas == nullptr) return;
+    for (int l = 0; l < linhas; l++) delete[] celulas[l];
+    delete[] celulas;
+}
+
+char** copiarCelulas(const Mapa& mapa) {
+    char** copia = new char*[mapa.linhas];
+    for (int l = 0; l < mapa.linhas; l++) {
+        copia[l] = new char[mapa.colunas];
+        for (int c = 0; c < mapa.colunas; c++) copia[l][c] = mapa.celulas[l][c];
     }
+    return copia;
+}
+
+void liberarMapa(Mapa* mapa) {
+    liberarCelulas(mapa->celulas, mapa->linhas);
     mapa->celulas = nullptr;
     mapa->linhas = 0;
     mapa->colunas = 0;
@@ -170,8 +182,7 @@ bool carregarMapa(const std::string& caminho, Mapa* mapa, std::string* erro) {
     if (ok) ok = validarConteudo(*mapa, erro);
 
     if (!ok) {
-        for (int l = 0; l < alocadas; l++) delete[] celulas[l];
-        delete[] celulas;
+        liberarCelulas(celulas, alocadas);
         mapa->linhas = 0;
         mapa->colunas = 0;
         mapa->celulas = nullptr;
