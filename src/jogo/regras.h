@@ -1,7 +1,7 @@
 #ifndef REGRAS_H
 #define REGRAS_H
 
-#include "dados/estruturas.h"
+#include "../dados/estruturas.h"
 
 // Move o jogador uma celula se o passo ja foi liberado e o destino estiver livre.
 bool moverJogador(Partida* partida, int indice, int dLinha, int dColuna);

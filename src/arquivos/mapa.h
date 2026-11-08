@@ -2,7 +2,7 @@
 #define MAPA_H
 
 #include <string>
-#include "dados/estruturas.h"
+#include "../dados/estruturas.h"
 
 // "mapa1.txt", "mapa2.txt"...
 std::string nomeArquivoMapa(int numero);

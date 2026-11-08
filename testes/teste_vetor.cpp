@@ -1,6 +1,6 @@
 // Etapa 2: cresce e remove ate 1000 elementos de tipos diferentes.
 #include <iostream>
-#include "dados/estruturas.h"
+#include "../src/dados/estruturas.h"
 
 static int falhas = 0;
 

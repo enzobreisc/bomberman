@@ -1,7 +1,7 @@
-#include "jogo/tempo.h"
+#include "tempo.h"
 #include <thread>
 #include <cstdio>
-#include "dados/constantes.h"
+#include "../dados/constantes.h"
 
 using relogio_real = std::chrono::steady_clock;
 

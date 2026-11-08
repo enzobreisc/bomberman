@@ -1,7 +1,7 @@
 // Etapa 3: "valido_*" deve carregar; "invalido_*" deve ser recusado com motivo.
 // Uso: ./teste_mapa testes/mapas/*.txt
 #include <iostream>
-#include "arquivos/mapa.h"
+#include "../src/arquivos/mapa.h"
 
 static int falhas = 0;
 

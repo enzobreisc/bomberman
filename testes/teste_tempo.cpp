@@ -1,6 +1,6 @@
 // Etapa 4: o relogio para durante a pausa e continua de onde parou.
 #include <iostream>
-#include "jogo/tempo.h"
+#include "../src/jogo/tempo.h"
 
 static int falhas = 0;
 

@@ -2,7 +2,7 @@
 #define TELA_H
 
 #include <string>
-#include "dados/estruturas.h"
+#include "../dados/estruturas.h"
 
 // Limpa a tela. So para trocas de tela, nunca dentro do laco do jogo.
 void limparTela();

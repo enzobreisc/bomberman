@@ -1,6 +1,6 @@
 # Testes fora do Windows. Rodar da raiz do projeto.
 CXX      = c++
-CXXFLAGS = -std=c++17 -Wall -Wextra -g -Isrc
+CXXFLAGS = -std=c++17 -Wall -Wextra -g
 CABECALHOS = src/dados/constantes.h src/dados/estruturas.h src/dados/vetor_dinamico.h src/arquivos/mapa.h src/jogo/tempo.h src/jogo/partida.h src/jogo/regras.h
 
 FONTES = src/main.cpp src/interface/menu.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp \

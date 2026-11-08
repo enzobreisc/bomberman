@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-#include "arquivos/historico.h"
+#include "../src/arquivos/historico.h"
 
 static int falhas = 0;
 

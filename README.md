@@ -28,7 +28,7 @@ O jogo usa `conio.h` e `windows.h`, então compila no Windows (g++/MinGW), na
 pasta do projeto (onde ficam os `mapaN.txt`):
 
 ```
-g++ -std=c++17 -Isrc -o bomberman.exe src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
+g++ -std=c++17 -o bomberman.exe src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
 bomberman.exe
 ```
 

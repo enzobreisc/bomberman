@@ -1,7 +1,7 @@
-#include "arquivos/historico.h"
+#include "historico.h"
 #include <cstdlib>
 #include <fstream>
-#include "dados/constantes.h"
+#include "../dados/constantes.h"
 
 static const char* ARQUIVO_HISTORICO = "historico.csv";
 

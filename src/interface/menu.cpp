@@ -1,15 +1,15 @@
-#include "interface/menu.h"
+#include "menu.h"
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <string>
-#include "dados/constantes.h"
-#include "jogo/entrada.h"
-#include "arquivos/historico.h"
-#include "jogo/laco.h"
-#include "arquivos/mapa.h"
-#include "jogo/partida.h"
-#include "interface/tela.h"
+#include "../dados/constantes.h"
+#include "../jogo/entrada.h"
+#include "../arquivos/historico.h"
+#include "../jogo/laco.h"
+#include "../arquivos/mapa.h"
+#include "../jogo/partida.h"
+#include "tela.h"
 
 static bool lerLinha(std::string* linha) {
     esvaziarTeclado();

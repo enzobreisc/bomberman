@@ -2,7 +2,7 @@
 #define PARTIDA_H
 
 #include <string>
-#include "dados/estruturas.h"
+#include "../dados/estruturas.h"
 
 // Carrega o mapa e aloca tudo que a partida usa. Em caso de erro devolve false,
 // escreve o motivo em 'erro' e nao deixa nada alocado.

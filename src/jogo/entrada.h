@@ -1,7 +1,7 @@
 #ifndef ENTRADA_H
 #define ENTRADA_H
 
-#include "dados/estruturas.h"
+#include "../dados/estruturas.h"
 
 // Le o estado das teclas dos dois jogadores ao mesmo tempo. Nao aplica regras.
 void lerAcoes(EstadoTeclas* anterior, Acoes* acoes);

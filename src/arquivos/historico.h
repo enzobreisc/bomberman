@@ -2,7 +2,7 @@
 #define HISTORICO_H
 
 #include <string>
-#include "dados/estruturas.h"
+#include "../dados/estruturas.h"
 
 // Acrescenta uma linha ao historico.csv.
 bool gravarRegistro(const RegistroHistorico& registro, std::string* erro);

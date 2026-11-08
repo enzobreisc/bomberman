@@ -3,7 +3,7 @@
 
 #include <string>
 #include <chrono>
-#include "dados/vetor_dinamico.h"
+#include "vetor_dinamico.h"
 
 // Arena carregada de um arquivo; celulas sempre em simbolos do formato C.
 struct Mapa {

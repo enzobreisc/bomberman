@@ -1,7 +1,7 @@
 #ifndef VETOR_DINAMICO_H
 #define VETOR_DINAMICO_H
 
-#include "dados/constantes.h"
+#include "constantes.h"
 
 // Vetor dinamico generico: dados, quantidade usada e capacidade.
 template <typename T>

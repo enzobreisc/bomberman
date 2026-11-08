@@ -1,7 +1,7 @@
-#include "arquivos/mapa.h"
+#include "mapa.h"
 #include <fstream>
 #include <sstream>
-#include "dados/constantes.h"
+#include "../dados/constantes.h"
 
 std::string nomeArquivoMapa(int numero) {
     return "mapa" + std::to_string(numero) + ".txt";
