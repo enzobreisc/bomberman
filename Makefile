@@ -7,14 +7,20 @@ CABECALHOS = constantes.h estruturas.h vetor_dinamico.h mapa.h
 
 .PHONY: testes vazamentos limpar
 
-testes: build/teste_vetor build/teste_mapa
+testes: build/teste_vetor build/teste_mapa build/teste_tempo
 	./build/teste_vetor
 	./build/teste_mapa testes/mapas/*.txt
+	./build/teste_tempo
 
 # Verifica vazamentos de memoria (macOS: leaks)
-vazamentos: build/teste_vetor build/teste_mapa
+vazamentos: build/teste_vetor build/teste_mapa build/teste_tempo
 	leaks --atExit -- ./build/teste_vetor
 	leaks --atExit -- ./build/teste_mapa testes/mapas/*.txt
+	leaks --atExit -- ./build/teste_tempo
+
+build/teste_tempo: testes/teste_tempo.cpp tempo.cpp $(CABECALHOS) tempo.h
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) testes/teste_tempo.cpp tempo.cpp -o $@
 
 build/teste_vetor: testes/teste_vetor.cpp $(CABECALHOS)
 	@mkdir -p build

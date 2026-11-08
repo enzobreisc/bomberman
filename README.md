@@ -115,6 +115,20 @@ construtores). Não há variáveis globais.
 - **Ponteiros inválidos:** ao crescer, o vetor antigo é apagado, então o código
   guarda **índices**, nunca ponteiros para elementos.
 
+### Relógio do jogo e ritmo do ciclo (`tempo.h` / `tempo.cpp`)
+- `atualizarRelogio` (uma vez por ciclo) mede o tempo real desde o ciclo
+  anterior com `steady_clock` e soma ao relógio do jogo **só se não estiver
+  pausado**. Assim uma bomba com 1 s restante continua com 1 s depois de uma
+  pausa de 2 s ou de 2 minutos.
+- `completarCiclo` espera só o que falta para 33 ms (`sleep_until`), e é o
+  **único** lugar do programa que dorme. Se o ciclo demorou mais, não espera.
+- Cronômetro regressivo: `tempoRestante` + `formatarMMSS` (mm:ss).
+- _E se um ciclo demorar 500 ms?_ O passo é limitado por jogador a um por vez e
+  o próximo só é liberado 150 ms depois do instante do passo anterior, então o
+  jogador não anda várias casas de uma vez.
+- Teste: `testes/teste_tempo.cpp` mostra o relógio parado durante a pausa e
+  continuando exatamente de onde parou.
+
 ## (d) Pontos de alocação dinâmica (quem aloca / quem libera)
 
 | O que                         | Quem aloca            | Quem libera        |
