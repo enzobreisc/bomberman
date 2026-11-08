@@ -6,7 +6,11 @@ CABECALHOS = src/dados/constantes.h src/dados/estruturas.h src/dados/vetor_dinam
 FONTES = src/main.cpp src/interface/menu.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp \
          src/interface/tela.cpp src/jogo/entrada.cpp src/arquivos/historico.cpp
 
-.PHONY: testes vazamentos verificar-windows limpar
+FONTES_JOGO = src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp \
+              src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp \
+              src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
+
+.PHONY: testes vazamentos verificar-windows jogo limpar
 
 testes: build/teste_vetor build/teste_mapa build/teste_tempo build/teste_regras build/teste_historico
 	./build/teste_vetor
@@ -47,6 +51,10 @@ build/teste_mapa: testes/teste_mapa.cpp src/arquivos/mapa.cpp $(CABECALHOS)
 verificar-windows:
 	@for f in $(FONTES); do $(CXX) $(CXXFLAGS) -Itestes/stub -fsyntax-only $$f || exit 1; done
 	@echo "sintaxe ok"
+
+# Jogo completo; so compila no Windows (usa windows.h e conio.h).
+jogo:
+	$(CXX) $(CXXFLAGS) $(FONTES_JOGO) -o bomberman.exe
 
 limpar:
 	rm -rf build
