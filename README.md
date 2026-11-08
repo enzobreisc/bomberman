@@ -120,12 +120,36 @@ construtores). Não há variáveis globais.
 | O que                         | Quem aloca            | Quem libera        |
 |-------------------------------|-----------------------|--------------------|
 | `VetorDinamico<T>` (bombas, chamas) | `iniciarVetor`, `crescerVetor` | `liberarVetor` |
+| Matriz `Mapa.celulas` (`char**`)    | `carregarMapa` (mapa.cpp) | `liberarMapa`; se a leitura falha no meio, o próprio `carregarMapa` libera o que já alocou |
+| Vetor temporário `int[colunas]` (leitura formato N) | `lerLinhaMapa` | a mesma função, antes de retornar |
 
 _(a tabela é completada a cada etapa)_
 
 ## (e) Leitura dos dois formatos de mapa
 
-_(pendente: Etapa 3)_
+Arquivo (`mapaN.txt`): primeira linha `L C formato` (`C` = caracteres,
+`N` = números), segunda linha o título, depois `L` linhas com `C` valores.
+
+- **Descoberta:** `descobrirMapas()` tenta abrir `mapa1.txt`, `mapa2.txt`... com
+  `is_open()` até um não existir. Nenhum número de mapas está escrito no código.
+- **Função template única:** `lerCelulas<T>` lê a linha inteira com `getline`,
+  extrai valores com `>>` numa variável do tipo `T` (`char` no formato C, `int`
+  no formato N) e confere a quantidade. Não há duas funções duplicadas.
+- **Tradução do formato N:** acontece num único ponto (`traduzirNumero`, chamada
+  por `lerLinhaMapa` logo após a leitura): `1`→`#`, `2`→`+`, `0`→`.`, `3`→`1`,
+  `4`→`2`. Depois disso o jogo só conhece o formato C.
+- **Validações** (com mensagem do motivo, sem imprimir nada): primeira linha
+  ausente, L ou C não numéricos ou menores que 5, formato diferente de C/N,
+  título ausente, menos linhas que L, linha com quantidade de valores diferente
+  de C, valor fora do conjunto e ausência de exatamente um jogador 1 e um
+  jogador 2. Se falhar no meio, a memória já alocada é liberada.
+- **Posições iniciais:** `extrairPosicoesIniciais` troca os símbolos `1`/`2` por
+  célula vazia e devolve as posições (que ficam guardadas em `Jogador`).
+- **Testes:** `make testes` roda `testes/teste_mapa.cpp` com mapas válidos e
+  inválidos de `testes/mapas/` (inclusive 5x5, 25x60, CRLF, vazio e quebrados
+  de cada tipo). `make vazamentos` confirma 0 vazamentos no macOS.
+- **Atenção:** `mapa1.txt` e `mapa2.txt` na raiz são **provisórios** e devem ser
+  trocados pelos exemplos fornecidos pelo professor.
 
 ## (f) Desafios extras
 
