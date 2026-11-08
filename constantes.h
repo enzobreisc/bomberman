@@ -29,6 +29,14 @@ constexpr char CEL_VAZIO  = '.';
 constexpr char CEL_J1     = '1';
 constexpr char CEL_J2     = '2';
 
+// Simbolos usados so na tela
+constexpr char SIM_BOMBA  = '@';
+constexpr char SIM_CHAMA  = '*';
+
+// Resultado de uma rodada (0 e 1 sao os indices dos vencedores)
+constexpr int RODADA_EM_ANDAMENTO = -2;
+constexpr int RODADA_EMPATE       = -1;
+
 // Formatos de arquivo de mapa
 constexpr char FORMATO_C  = 'C';
 constexpr char FORMATO_N  = 'N';

@@ -46,6 +46,22 @@ struct Relogio {
     long long agoraJogo;  // ms
 };
 
+// O que cada jogador quer fazer neste ciclo. Direcao: -1, 0 ou 1.
+struct Acoes {
+    int dLinha[2];
+    int dColuna[2];
+    bool bomba[2];
+    bool pausa;
+    bool abandonar;
+};
+
+// Estado anterior das teclas, para detectar o momento em que sao apertadas.
+struct EstadoTeclas {
+    bool bomba[2];
+    bool pausa;
+    bool esc;
+};
+
 // Estado de uma partida em andamento.
 struct Partida {
     Mapa mapa;
