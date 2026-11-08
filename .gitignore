@@ -1,0 +1,9 @@
+*.exe
+*.o
+*.obj
+*.out
+*.dSYM/
+historico.csv
+.DS_Store
+build/
+.vs/
