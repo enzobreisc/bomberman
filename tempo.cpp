@@ -1,4 +1,3 @@
-// tempo.cpp
 #include "tempo.h"
 #include <thread>
 #include <cstdio>
@@ -15,7 +14,6 @@ void atualizarRelogio(Relogio* relogio, bool pausado) {
     relogio_real::time_point agora = relogio_real::now();
     long long delta = std::chrono::duration_cast<std::chrono::milliseconds>(
                           agora - relogio->inicioCiclo).count();
-    // Durante a pausa o tempo real passa, mas o relogio do jogo nao.
     if (!pausado) relogio->agoraJogo += delta;
     relogio->inicioCiclo = agora;
 }
@@ -23,7 +21,6 @@ void atualizarRelogio(Relogio* relogio, bool pausado) {
 void completarCiclo(const Relogio& relogio) {
     relogio_real::time_point alvo = relogio.inicioCiclo +
                                     std::chrono::milliseconds(CICLO_MS);
-    // Se o ciclo demorou mais que CICLO_MS, 'alvo' ja passou e nao esperamos.
     if (relogio_real::now() < alvo) {
         std::this_thread::sleep_until(alvo);
     }
@@ -36,7 +33,7 @@ long long tempoRestante(const Relogio& relogio, long long instanteInicio,
 }
 
 std::string formatarMMSS(long long milissegundos) {
-    long long segundos = (milissegundos + 999) / 1000;   // arredonda para cima
+    long long segundos = (milissegundos + 999) / 1000;
     int minutos = static_cast<int>(segundos / 60);
     int resto = static_cast<int>(segundos % 60);
     char texto[16];

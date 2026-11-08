@@ -1,4 +1,3 @@
-// mapa.cpp
 #include "mapa.h"
 #include <fstream>
 #include <sstream>
@@ -18,15 +17,8 @@ int descobrirMapas() {
     return total;
 }
 
-// ---------------------------------------------------------------------------
-// Leitura das celulas (UMA funcao template para os dois formatos)
-// ---------------------------------------------------------------------------
-
-// Le uma linha inteira do arquivo e extrai valores do tipo T com >>.
-//   T = char (formato C): cada simbolo e um valor.
-//   T = int  (formato N): cada numero e um valor.
-// Guarda ate 'quantidade' valores em 'destino' e confere se a linha tinha
-// exatamente essa quantidade. Nao ha duplicacao de logica entre os formatos.
+// Le uma linha e extrai valores do tipo T com >>; confere a quantidade.
+// Serve para os dois formatos (T = char no C, T = int no N).
 template <typename T>
 static bool lerCelulas(std::istream& arq, int quantidade, T* destino,
                        std::string* erro) {
@@ -42,7 +34,6 @@ static bool lerCelulas(std::istream& arq, int quantidade, T* destino,
         if (lidos < quantidade) destino[lidos] = valor;
         lidos++;
     }
-    // Se parou por erro (nao por fim da linha), havia um valor invalido.
     if (!ss.eof()) {
         *erro = "valor invalido em uma linha do mapa";
         return false;
@@ -54,9 +45,8 @@ static bool lerCelulas(std::istream& arq, int quantidade, T* destino,
     return true;
 }
 
-// Traducao do formato N para o formato C. E o UNICO ponto de traducao.
-// 1 = parede, 2 = bloco, 0 = vazio, 3 = jogador 1, 4 = jogador 2.
-// Numero desconhecido vira '?', que a validacao recusa depois.
+// Unico ponto de traducao do formato N para o C.
+// Numero desconhecido vira '?', recusado na validacao.
 static char traduzirNumero(int numero) {
     switch (numero) {
         case 1: return CEL_PAREDE;
@@ -68,14 +58,13 @@ static char traduzirNumero(int numero) {
     }
 }
 
-// Le uma linha do mapa no formato indicado e deixa 'destino' (char[colunas])
-// ja em simbolos do formato C.
+// Le uma linha do mapa e deixa 'destino' em simbolos do formato C.
 static bool lerLinhaMapa(std::istream& arq, char formato, int colunas,
                          char* destino, std::string* erro) {
     if (formato == FORMATO_C) {
         return lerCelulas<char>(arq, colunas, destino, erro);
     }
-    int* numeros = new int[colunas];          // temporario, liberado abaixo
+    int* numeros = new int[colunas];
     bool ok = lerCelulas<int>(arq, colunas, numeros, erro);
     if (ok) {
         for (int c = 0; c < colunas; c++) destino[c] = traduzirNumero(numeros[c]);
@@ -84,9 +73,7 @@ static bool lerLinhaMapa(std::istream& arq, char formato, int colunas,
     return ok;
 }
 
-// ---------------------------------------------------------------------------
-// Validacao do conteudo (ja em simbolos do formato C)
-// ---------------------------------------------------------------------------
+// Simbolos permitidos e exatamente um jogador 1 e um jogador 2.
 static bool validarConteudo(const Mapa& mapa, std::string* erro) {
     int jogador1 = 0;
     int jogador2 = 0;
@@ -110,10 +97,6 @@ static bool validarConteudo(const Mapa& mapa, std::string* erro) {
     return true;
 }
 
-// ---------------------------------------------------------------------------
-// Carregar / liberar
-// ---------------------------------------------------------------------------
-
 void liberarMapa(Mapa* mapa) {
     if (mapa->celulas != nullptr) {
         for (int l = 0; l < mapa->linhas; l++) delete[] mapa->celulas[l];
@@ -136,7 +119,6 @@ bool carregarMapa(const std::string& caminho, Mapa* mapa, std::string* erro) {
         return false;
     }
 
-    // Primeira linha: L C formato
     int linhas = 0;
     int colunas = 0;
     char formato = ' ';
@@ -158,20 +140,19 @@ bool carregarMapa(const std::string& caminho, Mapa* mapa, std::string* erro) {
         return false;
     }
 
-    // Consome o resto da primeira linha e le o titulo.
     std::string resto;
     std::getline(arq, resto);
     std::string titulo;
     std::getline(arq, titulo);
     while (!titulo.empty() && (titulo.back() == '\r' || titulo.back() == ' ')) {
-        titulo.pop_back();   // remove CR de arquivos com final de linha do Windows
+        titulo.pop_back();
     }
     if (titulo.empty()) {
         *erro = "titulo do mapa ausente";
         return false;
     }
 
-    // Aloca a matriz aos poucos para poder desfazer se uma linha falhar.
+    // Aloca linha a linha para poder desfazer se alguma falhar.
     char** celulas = new char*[linhas];
     int alocadas = 0;
     bool ok = true;
@@ -189,7 +170,6 @@ bool carregarMapa(const std::string& caminho, Mapa* mapa, std::string* erro) {
     if (ok) ok = validarConteudo(*mapa, erro);
 
     if (!ok) {
-        // Libera so o que foi alocado antes do erro.
         for (int l = 0; l < alocadas; l++) delete[] celulas[l];
         delete[] celulas;
         mapa->linhas = 0;

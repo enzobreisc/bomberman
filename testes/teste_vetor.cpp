@@ -1,5 +1,4 @@
-// Teste da Etapa 2: cresce e remove ate 1000 elementos de tipos diferentes.
-// Compile e rode com: make testes   (e veja vazamentos com: make vazamentos)
+// Etapa 2: cresce e remove ate 1000 elementos de tipos diferentes.
 #include <iostream>
 #include "../estruturas.h"
 
@@ -26,7 +25,6 @@ int main() {
     VERIFICA(vi.capacidade >= 1000);
     for (int i = 0; i < 1000; i++) VERIFICA(vi.dados[i] == i);
 
-    // Remocao do meio: o ultimo elemento ocupa o lugar do removido.
     removerPorIndice(&vi, 10);
     VERIFICA(vi.quantidade == 999);
     VERIFICA(vi.dados[10] == 999);
@@ -34,7 +32,7 @@ int main() {
     VERIFICA(vi.quantidade == 0);
     liberarVetor(&vi);
     VERIFICA(vi.dados == nullptr);
-    liberarVetor(&vi);  // segunda liberacao nao pode quebrar
+    liberarVetor(&vi);  // liberar duas vezes e seguro
 
     // ---- Bomba ----
     VetorDinamico<Bomba> vb;

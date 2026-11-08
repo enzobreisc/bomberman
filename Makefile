@@ -1,6 +1,4 @@
-# Makefile para desenvolver/testar fora do Windows (clang++ ou g++).
-# No Windows, o jogo completo compila com g++/MinGW (veja o README).
-# Rode sempre da raiz do projeto (os testes leem arquivos em testes/mapas).
+# Testes fora do Windows. Rodar da raiz do projeto.
 CXX      = c++
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
 CABECALHOS = constantes.h estruturas.h vetor_dinamico.h mapa.h
@@ -12,7 +10,7 @@ testes: build/teste_vetor build/teste_mapa build/teste_tempo
 	./build/teste_mapa testes/mapas/*.txt
 	./build/teste_tempo
 
-# Verifica vazamentos de memoria (macOS: leaks)
+# Vazamentos de memoria (macOS)
 vazamentos: build/teste_vetor build/teste_mapa build/teste_tempo
 	leaks --atExit -- ./build/teste_vetor
 	leaks --atExit -- ./build/teste_mapa testes/mapas/*.txt

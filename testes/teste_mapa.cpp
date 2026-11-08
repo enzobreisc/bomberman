@@ -1,7 +1,4 @@
-// Teste da Etapa 3: carrega os mapas passados na linha de comando.
-// Arquivos "valido_*" precisam carregar; "invalido_*" precisam ser recusados
-// COM um motivo. Alem disso, os mapas valido_5x5_C e valido_5x5_N (mesmo
-// desenho em formatos diferentes) precisam carregar identicos.
+// Etapa 3: "valido_*" deve carregar; "invalido_*" deve ser recusado com motivo.
 // Uso: ./teste_mapa testes/mapas/*.txt
 #include <iostream>
 #include "../mapa.h"
@@ -47,7 +44,7 @@ int main(int argc, char** argv) {
         if (ok) liberarMapa(&mapa);
     }
 
-    // Os dois formatos precisam produzir o mesmo mapa.
+    // Formatos C e N do mesmo desenho devem carregar iguais.
     Mapa c, n;
     std::string erro;
     std::string dir = "testes/mapas/";
@@ -59,7 +56,6 @@ int main(int argc, char** argv) {
         } else {
             std::cout << "ok  formatos C e N carregam iguais\n";
         }
-        // Posicoes iniciais viram celula vazia.
         int l1 = -1, c1 = -1, l2 = -1, c2 = -1;
         extrairPosicoesIniciais(&c, &l1, &c1, &l2, &c2);
         if (l1 != 1 || c1 != 1 || l2 != 1 || c2 != 3 ||
@@ -76,7 +72,6 @@ int main(int argc, char** argv) {
         falhas++;
     }
 
-    // Arquivo inexistente nao pode travar.
     Mapa x;
     if (carregarMapa("nao_existe.txt", &x, &erro)) {
         std::cout << "FALHOU: arquivo inexistente carregou\n";
