@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compilar bomberman",
+            "type": "process",
+            "command": "C:/msys64/mingw64/bin/g++.exe",
+            "args": [
+                "-std=c++17", "-Wall", "-Wextra", "-g",
+                "src/main.cpp",
+                "src/jogo/laco.cpp",
+                "src/jogo/partida.cpp",
+                "src/jogo/regras.cpp",
+                "src/jogo/tempo.cpp",
+                "src/jogo/entrada.cpp",
+                "src/arquivos/mapa.cpp",
+                "src/arquivos/historico.cpp",
+                "src/interface/menu.cpp",
+                "src/interface/tela.cpp",
+                "-o", "bomberman.exe"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": ["$gcc"],
+            "group": { "kind": "build", "isDefault": true }
+        }
+    ]
+}

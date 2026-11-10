@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Jogar bomberman",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bomberman.exe",
+            "cwd": "${workspaceFolder}",
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+            "preLaunchTask": "compilar bomberman"
+        }
+    ]
+}
