@@ -1,7 +1,31 @@
 #include "interface/menu.h"
 #include "interface/tela.h"
+#include "dados/plataforma.h"
+#ifndef JOGO_WINDOWS
+#include <climits>
+#include <cstdlib>
+#include <string>
+#include <unistd.h>
+#endif
 
-int main() {
+// Mapas e historico sao lidos da pasta do executavel, mesmo quando o jogo
+// e aberto com duplo clique (o terminal comeca na pasta do usuario).
+static void entrarNaPastaDoExecutavel(const char* argv0) {
+#ifndef JOGO_WINDOWS
+    char caminho[PATH_MAX];
+    if (realpath(argv0, caminho) == nullptr) return;
+    std::string pasta(caminho);
+    std::string::size_type barra = pasta.rfind('/');
+    if (barra == std::string::npos) return;
+    pasta.resize(barra == 0 ? 1 : barra);
+    if (chdir(pasta.c_str()) != 0) return;
+#else
+    (void)argv0;
+#endif
+}
+
+int main(int, char** argv) {
+    entrarNaPastaDoExecutavel(argv[0]);
     bool continuar = true;
     while (continuar) {
         mostrarMenu();
