@@ -1,4 +1,4 @@
-# Testes fora do Windows. Rodar da raiz do projeto.
+# Rodar da raiz do projeto. "make jogar" compila e abre o jogo.
 CXX      = c++
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
 CABECALHOS = src/dados/constantes.h src/dados/estruturas.h src/dados/vetor_dinamico.h src/arquivos/mapa.h src/jogo/tempo.h src/jogo/partida.h src/jogo/regras.h
@@ -10,7 +10,7 @@ FONTES_JOGO = src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regra
               src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp \
               src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
 
-.PHONY: testes vazamentos verificar-windows jogo limpar
+.PHONY: testes vazamentos verificar-windows jogo jogar limpar
 
 testes: build/teste_vetor build/teste_mapa build/teste_tempo build/teste_regras build/teste_historico
 	./build/teste_vetor
@@ -49,12 +49,22 @@ build/teste_mapa: testes/teste_mapa.cpp src/arquivos/mapa.cpp $(CABECALHOS)
 
 # Confere so a sintaxe do jogo completo com declaracoes falsas de windows.h e conio.h.
 verificar-windows:
-	@for f in $(FONTES); do $(CXX) $(CXXFLAGS) -Itestes/stub -fsyntax-only $$f || exit 1; done
+	@for f in $(FONTES); do $(CXX) $(CXXFLAGS) -DJOGO_WINDOWS -Itestes/stub -fsyntax-only $$f || exit 1; done
 	@echo "sintaxe ok"
 
-# Jogo completo; so compila no Windows (usa windows.h e conio.h).
+# Jogo completo. No macOS/Linux gera ./bomberman (usa termios e ANSI).
+# No Windows (MinGW) gera bomberman.exe (usa windows.h e conio.h).
+ifeq ($(OS),Windows_NT)
+EXECUTAVEL = bomberman.exe
+else
+EXECUTAVEL = bomberman
+endif
+
 jogo:
-	$(CXX) $(CXXFLAGS) $(FONTES_JOGO) -o bomberman.exe
+	$(CXX) $(CXXFLAGS) $(FONTES_JOGO) -o $(EXECUTAVEL)
+
+jogar: jogo
+	./$(EXECUTAVEL)
 
 limpar:
-	rm -rf build
+	rm -rf build bomberman bomberman.exe

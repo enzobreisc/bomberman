@@ -4,7 +4,7 @@ Trabalho M3 - Algoritmos e Programação II (22817)
 Universidade do Vale do Itajaí - Escola Politécnica - Ciência da Computação
 
 Jogo de Bomberman para dois jogadores no mesmo teclado, em tempo real, feito em
-C++ para console do Windows (`conio.h` e `windows.h`), sem bibliotecas gráficas.
+C++ para o terminal (Windows ou macOS), sem bibliotecas gráficas.
 
 > Este README é escrito junto com cada etapa do projeto. Seções marcadas com
 > _(pendente)_ ainda serão preenchidas nas próximas etapas.
@@ -24,8 +24,20 @@ mapaN.txt        mapas (na raiz, a pasta de execução)
 README.md, Makefile
 ```
 
-O jogo usa `conio.h` e `windows.h`, então compila no Windows (g++/MinGW), na
-pasta do projeto (onde ficam os `mapaN.txt`):
+No **macOS** (Xcode Command Line Tools: `xcode-select --install`), na pasta do
+projeto (onde ficam os `mapaN.txt`):
+
+```
+make jogar
+```
+
+No macOS o terminal não avisa quando uma tecla é solta: uma tecla vale como
+"segurada" por 120 ms depois da última vez que chegou (o auto-repeat do sistema
+mantém o movimento). Por isso dois jogadores andando ao mesmo tempo podem não
+funcionar bem; segurar duas teclas costuma repetir só a última. Bombas, pausa
+(P) e abandonar (Esc) funcionam normalmente.
+
+No **Windows** (`conio.h` e `windows.h`, g++/MinGW):
 
 ```
 g++ -std=c++17 -o bomberman.exe src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp

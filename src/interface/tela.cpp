@@ -1,11 +1,16 @@
 #include "tela.h"
+#include "../dados/plataforma.h"
 #include <cstdlib>
 #include <iostream>
+#ifdef JOGO_WINDOWS
 #include <windows.h>
+#endif
 #include "../dados/constantes.h"
 #include "../jogo/tempo.h"
 
 static const size_t LARGURA_MINIMA = 79;
+
+#ifdef JOGO_WINDOWS
 
 void limparTela() {
     std::system("cls");
@@ -25,6 +30,22 @@ static void moverCursorParaOInicio() {
     COORD origem = {0, 0};
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), origem);
 }
+
+#else
+
+// Terminais macOS/Linux: sequencias ANSI.
+void limparTela() {
+    std::cout << "\033[2J\033[H" << std::flush;
+}
+
+void ocultarCursor() { std::cout << "\033[?25l" << std::flush; }
+void mostrarCursor() { std::cout << "\033[?25h" << std::flush; }
+
+static void moverCursorParaOInicio() {
+    std::cout << "\033[H";
+}
+
+#endif
 
 // Acrescenta a linha completada com espacos, para apagar sobras do quadro anterior.
 static void acrescentarLinha(std::string* quadro, const std::string& linha) {
