@@ -153,7 +153,7 @@ void mostrarComoJogar() {
 void mostrarSobre() {
     limparTela();
     std::cout << "SOBRE\n\n"
-              << "Integrantes: Enzo Breischatt, Bruno Naressi, [terceiro integrante]\n"
+              << "Integrantes: Enzo Breischatt, Bruno Naressi\n"
               << "Data: 11/2026\n"
               << "Disciplina: Algoritmos e Programacao II (22817)\n"
               << "Professor: Thiago Felski\n\n"
