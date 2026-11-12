@@ -6,9 +6,6 @@ Universidade do Vale do Itajaí - Escola Politécnica - Ciência da Computação
 Jogo de Bomberman para dois jogadores no mesmo teclado, em tempo real, feito em
 C++ para o terminal (Windows ou macOS), sem bibliotecas gráficas.
 
-> Este README é escrito junto com cada etapa do projeto. Seções marcadas com
-> _(pendente)_ ainda serão preenchidas nas próximas etapas.
-
 ## (a) Como compilar e executar
 
 ## Estrutura de pastas
@@ -291,12 +288,11 @@ com 3 células livres ao redor, então as chances são iguais.
 
 ## (f) Desafios extras
 
-Nenhum implementado até o momento.
+Nenhum desafio extra foi implementado nesta versão final.
 
 ## Integrantes
 
 - Enzo Breischatt
 - Bruno Naressi
-- _(pendente: terceiro integrante)_
 
 Novembro/2026 — Professor Thiago Felski — Algoritmos e Programação II (22817).
