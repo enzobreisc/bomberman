@@ -286,6 +286,65 @@ Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
 Os mapas autorais têm simetria de ponto (rotação de 180°) e cada jogador começa
 com 3 células livres ao redor, então as chances são iguais.
 
+## Símbolos do jogo
+
+### Células do mapa (formato C, `constantes.h`)
+
+| Símbolo | Constante    | Significado                                                     |
+|---------|--------------|-----------------------------------------------------------------|
+| `#`     | `CEL_PAREDE` | parede indestrutível; segura a explosão                         |
+| `+`     | `CEL_BLOCO`  | bloco destrutível; a explosão o destrói e para nele             |
+| `.`     | `CEL_VAZIO`  | célula livre                                                    |
+| `1`     | `CEL_J1`     | posição inicial do jogador 1 (vira célula livre ao iniciar)     |
+| `2`     | `CEL_J2`     | posição inicial do jogador 2 (vira célula livre ao iniciar)     |
+
+### Células do mapa (formato N)
+
+Traduzidas na leitura para os símbolos do formato C (ver seção (e)).
+
+| Número | Vira | Significado                    |
+|--------|------|--------------------------------|
+| `0`    | `.`  | célula livre                   |
+| `1`    | `#`  | parede                         |
+| `2`    | `+`  | bloco destrutível              |
+| `3`    | `1`  | posição inicial do jogador 1   |
+| `4`    | `2`  | posição inicial do jogador 2   |
+
+### Símbolos desenhados só na tela
+
+| Símbolo | Constante   | Significado                                              |
+|---------|-------------|----------------------------------------------------------|
+| `@`     | `SIM_BOMBA` | bomba ativa (explode após 3 s)                           |
+| `*`     | `SIM_CHAMA` | chama da explosão (dura 0,5 s e elimina quem estiver nela) |
+| `1`/`2` | `CEL_J1`/`CEL_J2` | jogador 1 / jogador 2 na arena                     |
+
+No topo da tela, cada jogador aparece como `1 nome  rodadas: X  bombas: Y`,
+onde `rodadas` são as rodadas vencidas e `bombas` são as que ainda pode colocar
+(de 3). `(eliminado)` indica que morreu na rodada. `*** PAUSADO ***` aparece
+com o jogo pausado.
+
+### Teclas
+
+| Tecla                | Ação                                   |
+|----------------------|----------------------------------------|
+| `W` `A` `S` `D`      | move o jogador 1                       |
+| `F`                  | jogador 1 coloca bomba                 |
+| setas                | movem o jogador 2                      |
+| `Enter`              | jogador 2 coloca bomba                 |
+| `P`                  | pausa e continua                       |
+| `ESC`                | abandona a partida (pede confirmação)  |
+
+### Valores internos de resultado de rodada
+
+| Constante             | Valor | Significado                                        |
+|-----------------------|-------|----------------------------------------------------|
+| `RODADA_EM_ANDAMENTO` | `-2`  | rodada ainda não terminou                          |
+| `RODADA_EMPATE`       | `-1`  | empate (os dois morreram juntos ou o tempo acabou) |
+| `0` / `1`             | —     | índice do jogador que venceu a rodada              |
+
+Letras `C` e `N` na primeira linha do arquivo de mapa (`FORMATO_C` /
+`FORMATO_N`) indicam se os valores são caracteres ou números.
+
 ## (f) Desafios extras
 
 Nenhum desafio extra foi implementado nesta versão final.
