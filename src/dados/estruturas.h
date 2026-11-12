@@ -3,6 +3,7 @@
 
 #include <string>
 #include <chrono>
+#include "constantes.h"
 #include "vetor_dinamico.h"
 
 // Arena carregada de um arquivo; celulas sempre em simbolos do formato C.
@@ -60,6 +61,10 @@ struct EstadoTeclas {
     bool bomba[2];
     bool pausa;
     bool esc;
+    // So usados no macOS, onde o terminal nao avisa quando a tecla e solta:
+    // instante (ms) da ultima vez que cada tecla chegou e se ja chegou alguma.
+    long long ultimaVez[TECLAS_VIRTUAIS];
+    bool vista[TECLAS_VIRTUAIS];
 };
 
 // Estado de uma partida em andamento.

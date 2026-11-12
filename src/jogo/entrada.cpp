@@ -6,7 +6,6 @@
 #include <windows.h>
 #else
 #include <chrono>
-#include <cstdlib>
 #include <termios.h>
 #include <unistd.h>
 #endif
@@ -32,74 +31,73 @@ enum TeclaVirtual {
 
 using relogio_teclas = std::chrono::steady_clock;
 
-static relogio_teclas::time_point ultimaVez[TOTAL_TECLAS];
-static bool vista[TOTAL_TECLAS];
-static termios terminalOriginal;
-static bool modoCru = false;
+static_assert(TOTAL_TECLAS == TECLAS_VIRTUAIS, "TECLAS_VIRTUAIS em constantes.h");
 
-static void restaurarTerminal() {
-    if (!modoCru) return;
-    tcsetattr(STDIN_FILENO, TCSANOW, &terminalOriginal);
-    modoCru = false;
+static long long agoraMs() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               relogio_teclas::now().time_since_epoch()).count();
 }
 
-// Sem eco e sem esperar Enter; leitura nao bloqueante.
+// Sem eco e sem esperar Enter; leitura nao bloqueante. O estado do terminal
+// fica no proprio terminal (nao em variavel global): so muda se ainda estiver
+// no modo normal.
 static void ativarModoCru() {
-    if (modoCru) return;
-    if (tcgetattr(STDIN_FILENO, &terminalOriginal) != 0) return;
-    termios cru = terminalOriginal;
-    cru.c_lflag &= ~(ICANON | ECHO);
-    cru.c_cc[VMIN] = 0;
-    cru.c_cc[VTIME] = 0;
-    tcsetattr(STDIN_FILENO, TCSANOW, &cru);
-    modoCru = true;
-    static bool registrado = false;
-    if (!registrado) {
-        std::atexit(restaurarTerminal);
-        registrado = true;
-    }
+    termios t;
+    if (tcgetattr(STDIN_FILENO, &t) != 0) return;
+    if (!(t.c_lflag & (ICANON | ECHO))) return;
+    t.c_lflag &= ~(ICANON | ECHO);
+    t.c_cc[VMIN] = 0;
+    t.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &t);
 }
 
-static void marcar(TeclaVirtual tecla) {
-    vista[tecla] = true;
-    ultimaVez[tecla] = relogio_teclas::now();
+// Volta ao modo normal (com eco e linha inteira), pronto para std::getline.
+static void restaurarTerminal() {
+    termios t;
+    if (tcgetattr(STDIN_FILENO, &t) != 0) return;
+    t.c_lflag |= (ICANON | ECHO);
+    t.c_cc[VMIN] = 1;
+    t.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &t);
+}
+
+static void marcar(EstadoTeclas* teclas, TeclaVirtual tecla) {
+    teclas->vista[tecla] = true;
+    teclas->ultimaVez[tecla] = agoraMs();
 }
 
 // Le tudo que chegou ao terminal e atualiza o instante de cada tecla.
-static void lerBytesPendentes() {
+static void lerBytesPendentes(EstadoTeclas* teclas) {
     unsigned char buf[64];
     ssize_t n = read(STDIN_FILENO, buf, sizeof(buf));
     for (ssize_t i = 0; i < n; i++) {
         unsigned char c = buf[i];
         if (c == 27) {
             bool seta = i + 2 < n && (buf[i + 1] == '[' || buf[i + 1] == 'O');
-            if (!seta) { marcar(T_ESC); continue; }
+            if (!seta) { marcar(teclas, T_ESC); continue; }
             switch (buf[i + 2]) {
-                case 'A': marcar(T_CIMA); break;
-                case 'B': marcar(T_BAIXO); break;
-                case 'C': marcar(T_DIREITA); break;
-                case 'D': marcar(T_ESQUERDA); break;
+                case 'A': marcar(teclas, T_CIMA); break;
+                case 'B': marcar(teclas, T_BAIXO); break;
+                case 'C': marcar(teclas, T_DIREITA); break;
+                case 'D': marcar(teclas, T_ESQUERDA); break;
             }
             i += 2;
             continue;
         }
         switch (std::toupper(c)) {
-            case 'W': marcar(T_W); break;
-            case 'A': marcar(T_A); break;
-            case 'S': marcar(T_S); break;
-            case 'D': marcar(T_D); break;
-            case 'F': marcar(T_F); break;
-            case 'P': marcar(T_P); break;
-            case '\n': case '\r': marcar(T_ENTER); break;
+            case 'W': marcar(teclas, T_W); break;
+            case 'A': marcar(teclas, T_A); break;
+            case 'S': marcar(teclas, T_S); break;
+            case 'D': marcar(teclas, T_D); break;
+            case 'F': marcar(teclas, T_F); break;
+            case 'P': marcar(teclas, T_P); break;
+            case '\n': case '\r': marcar(teclas, T_ENTER); break;
         }
     }
 }
 
-static bool pressionada(TeclaVirtual tecla) {
-    if (!vista[tecla]) return false;
-    auto passou = std::chrono::duration_cast<std::chrono::milliseconds>(
-                      relogio_teclas::now() - ultimaVez[tecla]).count();
-    return passou < SEGURAR_MS;
+static bool pressionada(const EstadoTeclas& teclas, TeclaVirtual tecla) {
+    return teclas.vista[tecla] && agoraMs() - teclas.ultimaVez[tecla] < SEGURAR_MS;
 }
 
 #endif
@@ -129,13 +127,13 @@ void lerAcoes(EstadoTeclas* anterior, Acoes* acoes) {
     const bool p = pressionada('P'), esc = pressionada(VK_ESCAPE);
 #else
     ativarModoCru();
-    lerBytesPendentes();
-    const bool w = pressionada(T_W), a = pressionada(T_A);
-    const bool sb = pressionada(T_S), d = pressionada(T_D);
-    const bool cima = pressionada(T_CIMA), baixo = pressionada(T_BAIXO);
-    const bool esq = pressionada(T_ESQUERDA), dir = pressionada(T_DIREITA);
-    const bool f = pressionada(T_F), enter = pressionada(T_ENTER);
-    const bool p = pressionada(T_P), esc = pressionada(T_ESC);
+    lerBytesPendentes(anterior);
+    const bool w = pressionada(*anterior, T_W), a = pressionada(*anterior, T_A);
+    const bool sb = pressionada(*anterior, T_S), d = pressionada(*anterior, T_D);
+    const bool cima = pressionada(*anterior, T_CIMA), baixo = pressionada(*anterior, T_BAIXO);
+    const bool esq = pressionada(*anterior, T_ESQUERDA), dir = pressionada(*anterior, T_DIREITA);
+    const bool f = pressionada(*anterior, T_F), enter = pressionada(*anterior, T_ENTER);
+    const bool p = pressionada(*anterior, T_P), esc = pressionada(*anterior, T_ESC);
 #endif
     converterDirecao(w, sb, a, d, &acoes->dLinha[0], &acoes->dColuna[0]);
     converterDirecao(cima, baixo, esq, dir, &acoes->dLinha[1], &acoes->dColuna[1]);
@@ -165,7 +163,6 @@ void esvaziarTeclado() {
     ativarModoCru();
     unsigned char lixo[64];
     while (read(STDIN_FILENO, lixo, sizeof(lixo)) > 0) {}
-    for (bool& v : vista) v = false;
     restaurarTerminal();
 }
 
