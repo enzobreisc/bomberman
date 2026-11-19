@@ -81,7 +81,7 @@ static void enfileirarBombaEm(Partida* partida, VetorDinamico<int>* fila,
 // Blocos atingidos so viram vazio depois da cadeia inteira, para que o
 // resultado nao dependa da ordem em que as bombas sao processadas.
 static void propagarExplosao(Partida* partida, VetorDinamico<int>* fila,
-                             VetorDinamico<Chama>* blocos, int indiceBomba) {
+                             VetorDinamico<Posicao>* blocos, int indiceBomba) {
     const Bomba b = partida->bombas.dados[indiceBomba];
     const int direcoes[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
@@ -97,7 +97,7 @@ static void propagarExplosao(Partida* partida, VetorDinamico<int>* fila,
             acenderChama(partida, l, c);
             enfileirarBombaEm(partida, fila, l, c);
             if (cel == CEL_BLOCO) {
-                Chama destruido = {l, c, 0};
+                Posicao destruido = {l, c};
                 adicionarItem(blocos, destruido);
                 break;
             }
@@ -107,7 +107,7 @@ static void propagarExplosao(Partida* partida, VetorDinamico<int>* fila,
 
 void processarExplosoes(Partida* partida) {
     VetorDinamico<int> fila;
-    VetorDinamico<Chama> blocos;
+    VetorDinamico<Posicao> blocos;
     iniciarVetor(&fila);
     iniciarVetor(&blocos);
 

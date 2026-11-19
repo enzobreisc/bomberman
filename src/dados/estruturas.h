@@ -48,6 +48,12 @@ struct Relogio {
     long long sobraMicros;  // fracao de ms ainda nao somada (evita atraso acumulado)
 };
 
+// Uma celula da arena (usada para os blocos atingidos numa explosao).
+struct Posicao {
+    int linha;
+    int coluna;
+};
+
 // O que cada jogador quer fazer neste ciclo. Direcao: -1, 0 ou 1.
 struct Acoes {
     int dLinha[2];
