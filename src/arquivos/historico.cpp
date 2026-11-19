@@ -3,7 +3,7 @@
 #include <fstream>
 #include "../dados/constantes.h"
 
-static const char* ARQUIVO_HISTORICO = "historico.csv";
+constexpr const char* ARQUIVO_HISTORICO = "historico.csv";
 
 bool gravarRegistro(const RegistroHistorico& registro, std::string* erro) {
     std::ofstream arq(ARQUIVO_HISTORICO, std::ios::app);
