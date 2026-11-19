@@ -44,7 +44,8 @@ struct Chama {
 // Relogio do jogo: so avanca quando nao esta pausado.
 struct Relogio {
     std::chrono::steady_clock::time_point inicioCiclo;
-    long long agoraJogo;  // ms
+    long long agoraJogo;    // ms
+    long long sobraMicros;  // fracao de ms ainda nao somada (evita atraso acumulado)
 };
 
 // O que cada jogador quer fazer neste ciclo. Direcao: -1, 0 ou 1.

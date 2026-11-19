@@ -114,6 +114,10 @@ construtores). Não há variáveis globais.
 - **Por que existe:** isola o controle de tempo. `agoraJogo` (ms, 64 bits) só
   avança quando o jogo não está pausado; `inicioCiclo` guarda o começo do ciclo
   atual para calcular o delta e para esperar só o que falta até 33 ms.
+  `sobraMicros` guarda a fração de milissegundo que sobrou no ciclo: o delta é
+  medido em microssegundos e só os ms inteiros entram em `agoraJogo`. Descartar
+  essa fração a cada ciclo fazia o relógio do jogo atrasar cerca de 1% (≈1,5 s
+  numa rodada de 2 minutos).
 - **Decisão:** todos os instantes do jogo (pavio, chamas, passos, fim da
   rodada) usam esse relógio, então a pausa congela tudo sem código extra.
   _Alternativa descartada:_ guardar `time_point` do `steady_clock` em cada
