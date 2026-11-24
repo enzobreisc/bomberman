@@ -39,6 +39,7 @@ struct Chama {
     int linha;
     int coluna;
     long long instanteFim;
+    bool sobreBloco;  // bloco atingido: continua no mapa ate a chama se apagar
 };
 
 // Relogio do jogo: so avanca quando nao esta pausado.
@@ -46,12 +47,6 @@ struct Relogio {
     std::chrono::steady_clock::time_point inicioCiclo;
     long long agoraJogo;    // ms
     long long sobraMicros;  // fracao de ms ainda nao somada (evita atraso acumulado)
-};
-
-// Uma celula da arena (usada para os blocos atingidos numa explosao).
-struct Posicao {
-    int linha;
-    int coluna;
 };
 
 // O que cada jogador quer fazer neste ciclo. Direcao: -1, 0 ou 1.
@@ -68,10 +63,15 @@ struct EstadoTeclas {
     bool bomba[2];
     bool pausa;
     bool esc;
-    // So usados fora do Windows (macOS/Linux), onde o terminal nao avisa quando a tecla e solta:
-    // instante (ms) da ultima vez que cada tecla chegou e se ja chegou alguma.
+    // So usados fora do Windows (macOS/Linux). No macOS o estado real das teclas vem do
+    // sistema; so se ele nao responder para uma tecla o jogo volta a usar, so para ela, os
+    // bytes do terminal, que nao avisam quando a tecla e solta: instante (ms) da ultima vez
+    // que cada tecla chegou e se ja chegou alguma. acertosCG/errosCG contam, por tecla,
+    // quantas vezes o sistema concordou (ou nao) com uma tecla recebida pelo terminal.
     long long ultimaVez[TECLAS_VIRTUAIS];
     bool vista[TECLAS_VIRTUAIS];
+    int acertosCG[TECLAS_VIRTUAIS];
+    int errosCG[TECLAS_VIRTUAIS];
 };
 
 // Estado de uma partida em andamento.

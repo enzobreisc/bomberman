@@ -55,16 +55,17 @@ bool colocarBomba(Partida* partida, int indice) {
     return true;
 }
 
-static void acenderChama(Partida* partida, int linha, int coluna) {
+static void acenderChama(Partida* partida, int linha, int coluna, bool sobreBloco) {
     long long fim = partida->relogio.agoraJogo + CHAMA_MS;
     for (int i = 0; i < partida->chamas.quantidade; i++) {
         Chama* c = &partida->chamas.dados[i];
         if (c->linha == linha && c->coluna == coluna) {
             c->instanteFim = fim;
+            if (sobreBloco) c->sobreBloco = true;
             return;
         }
     }
-    Chama nova = {linha, coluna, fim};
+    Chama nova = {linha, coluna, fim, sobreBloco};
     adicionarItem(&partida->chamas, nova);
 }
 
@@ -78,14 +79,14 @@ static void enfileirarBombaEm(Partida* partida, VetorDinamico<int>* fila,
     }
 }
 
-// Blocos atingidos so viram vazio depois da cadeia inteira, para que o
-// resultado nao dependa da ordem em que as bombas sao processadas.
-static void propagarExplosao(Partida* partida, VetorDinamico<int>* fila,
-                             VetorDinamico<Posicao>* blocos, int indiceBomba) {
+// Um bloco atingido pega fogo mas continua no mapa (impedindo a passagem) ate a
+// chama se apagar; so entao vira vazio (ver apagarChamas). Assim o resultado
+// tambem nao depende da ordem em que as bombas da cadeia sao processadas.
+static void propagarExplosao(Partida* partida, VetorDinamico<int>* fila, int indiceBomba) {
     const Bomba b = partida->bombas.dados[indiceBomba];
     const int direcoes[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-    acenderChama(partida, b.linha, b.coluna);
+    acenderChama(partida, b.linha, b.coluna, false);
     for (int d = 0; d < 4; d++) {
         for (int passo = 1; passo <= b.alcance; passo++) {
             int l = b.linha + direcoes[d][0] * passo;
@@ -94,39 +95,34 @@ static void propagarExplosao(Partida* partida, VetorDinamico<int>* fila,
             char cel = partida->mapa.celulas[l][c];
             if (cel == CEL_PAREDE) break;
 
-            acenderChama(partida, l, c);
+            acenderChama(partida, l, c, cel == CEL_BLOCO);
             enfileirarBombaEm(partida, fila, l, c);
-            if (cel == CEL_BLOCO) {
-                Posicao destruido = {l, c};
-                adicionarItem(blocos, destruido);
-                break;
-            }
+            if (cel == CEL_BLOCO) break;
+        }
+    }
+}
+
+// Poe na fila (e marca como explodindo) as bombas cujo pavio acabou.
+static void enfileirarBombasVencidas(Partida* partida, VetorDinamico<int>* fila) {
+    for (int i = 0; i < partida->bombas.quantidade; i++) {
+        Bomba* b = &partida->bombas.dados[i];
+        bool vencida = partida->relogio.agoraJogo - b->instanteColocada >= PAVIO_MS;
+        if (vencida && !b->explodindo) {
+            b->explodindo = true;
+            adicionarItem(fila, i);
         }
     }
 }
 
 void processarExplosoes(Partida* partida) {
     VetorDinamico<int> fila;
-    VetorDinamico<Posicao> blocos;
     iniciarVetor(&fila);
-    iniciarVetor(&blocos);
 
-    for (int i = 0; i < partida->bombas.quantidade; i++) {
-        Bomba* b = &partida->bombas.dados[i];
-        bool vencida = partida->relogio.agoraJogo - b->instanteColocada >= PAVIO_MS;
-        if (vencida && !b->explodindo) {
-            b->explodindo = true;
-            adicionarItem(&fila, i);
-        }
-    }
+    enfileirarBombasVencidas(partida, &fila);
 
     // A fila cresce durante o laco: a condicao relê a quantidade a cada volta.
     for (int k = 0; k < fila.quantidade; k++) {
-        propagarExplosao(partida, &fila, &blocos, fila.dados[k]);
-    }
-
-    for (int i = 0; i < blocos.quantidade; i++) {
-        partida->mapa.celulas[blocos.dados[i].linha][blocos.dados[i].coluna] = CEL_VAZIO;
+        propagarExplosao(partida, &fila, fila.dados[k]);
     }
 
     // De tras para frente: a remocao troca com o ultimo, que ja foi conferido.
@@ -138,12 +134,13 @@ void processarExplosoes(Partida* partida) {
     }
 
     liberarVetor(&fila);
-    liberarVetor(&blocos);
 }
 
 void apagarChamas(Partida* partida) {
     for (int i = partida->chamas.quantidade - 1; i >= 0; i--) {
-        if (partida->chamas.dados[i].instanteFim <= partida->relogio.agoraJogo) {
+        const Chama& c = partida->chamas.dados[i];
+        if (c.instanteFim <= partida->relogio.agoraJogo) {
+            if (c.sobreBloco) partida->mapa.celulas[c.linha][c.coluna] = CEL_VAZIO;
             removerPorIndice(&partida->chamas, i);
         }
     }
