@@ -1,6 +1,7 @@
 #include "mapa.h"
 #include <fstream>
 #include <sstream>
+#include <type_traits>
 #include "../dados/constantes.h"
 
 std::string nomeArquivoMapa(int numero) {
@@ -26,6 +27,15 @@ static bool lerCelulas(std::istream& arq, int quantidade, T* destino,
     if (!std::getline(arq, linha)) {
         *erro = "o arquivo tem menos linhas de mapa do que o informado";
         return false;
+    }
+    if constexpr (std::is_same<T, char>::value) {
+        // Formato C: os simbolos de uma linha vem juntos, sem separador.
+        std::string::size_type fim = linha.find_last_not_of(" \t\r");
+        std::string util = fim == std::string::npos ? "" : linha.substr(0, fim + 1);
+        if (util.find_first_of(" \t") != std::string::npos) {
+            *erro = "no formato C os simbolos de uma linha devem vir juntos, sem separador";
+            return false;
+        }
     }
     std::istringstream ss(linha);
     int lidos = 0;
@@ -207,4 +217,12 @@ void extrairPosicoesIniciais(Mapa* mapa, int* linha1, int* coluna1,
             }
         }
     }
+}
+
+bool consultarMapa(int numero, std::string* titulo, std::string* erro) {
+    Mapa mapa;
+    if (!carregarMapa(nomeArquivoMapa(numero), &mapa, erro)) return false;
+    *titulo = mapa.titulo;
+    liberarMapa(&mapa);
+    return true;
 }

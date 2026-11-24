@@ -16,6 +16,10 @@ bool carregarMapa(const std::string& caminho, Mapa* mapa, std::string* erro);
 
 void liberarMapa(Mapa* mapa);
 
+// Confere o mapaN.txt e devolve o titulo (para listar os mapas). Em caso de erro
+// devolve false e o motivo em 'erro'. Nao deixa nada alocado.
+bool consultarMapa(int numero, std::string* titulo, std::string* erro);
+
 // Matriz nova com o mesmo conteudo de mapa.celulas; liberar com liberarCelulas.
 char** copiarCelulas(const Mapa& mapa);
 void liberarCelulas(char** celulas, int linhas);
