@@ -60,8 +60,13 @@ else
 EXECUTAVEL = bomberman
 endif
 
+# No macOS o estado das teclas vem do sistema (CGEventSourceKeyState).
+ifeq ($(shell uname),Darwin)
+BIBLIOTECAS = -framework ApplicationServices
+endif
+
 jogo:
-	$(CXX) $(CXXFLAGS) $(FONTES_JOGO) -o $(EXECUTAVEL)
+	$(CXX) $(CXXFLAGS) $(FONTES_JOGO) $(BIBLIOTECAS) -o $(EXECUTAVEL)
 
 jogar: jogo
 	./$(EXECUTAVEL)

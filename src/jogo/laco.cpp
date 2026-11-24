@@ -25,7 +25,8 @@ static bool confirmarAbandono(Partida* partida) {
 
 // Devolve false se abandonou; senao preenche o resultado da rodada.
 static bool executarRodada(Partida* partida, int* resultado) {
-    EstadoTeclas teclas = {};
+    EstadoTeclas teclas;
+    iniciarTeclas(&teclas);
     Acoes acoes;
 
     while (true) {

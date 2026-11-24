@@ -8,6 +8,9 @@
 #include <chrono>
 #include <termios.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <ApplicationServices/ApplicationServices.h>
+#endif
 #endif
 
 #ifdef JOGO_WINDOWS
@@ -18,9 +21,12 @@ static bool pressionada(int tecla) {
 
 #else
 
-// Terminais nao avisam quando uma tecla e solta. Entao uma tecla conta como
-// "pressionada" por um curto tempo depois da ultima vez que chegou ao terminal
-// (o auto-repeat do sistema mantem a tecla viva enquanto ela esta segurada).
+// No macOS o estado real de cada tecla (apertada/solta, varias ao mesmo tempo) vem
+// do sistema com CGEventSourceKeyState, como GetAsyncKeyState no Windows.
+// Terminais nao avisam quando uma tecla e solta; por isso o terminal so e usado
+// como reserva (outros sistemas, ou se o sistema negar a leitura das teclas): uma
+// tecla conta como "pressionada" por um curto tempo depois da ultima vez que
+// chegou ao terminal (o auto-repeat mantem a tecla viva enquanto ela esta segurada).
 static const long long SEGURAR_MS = 120;
 
 enum TeclaVirtual {
@@ -33,6 +39,41 @@ using relogio_teclas = std::chrono::steady_clock;
 
 static_assert(TOTAL_TECLAS == TECLAS_VIRTUAIS, "TECLAS_VIRTUAIS em constantes.h");
 
+#ifdef __APPLE__
+// Codigos de tecla do macOS (posicao fisica), na ordem de TeclaVirtual.
+static const int CODIGO_MAC[TOTAL_TECLAS] = {13, 0, 1, 2, 3, 35, 126, 125, 123, 124, 36, 53};
+static const int CODIGO_MAC_ENTER_NUMERICO = 76;
+
+static bool sistemaApertada(TeclaVirtual tecla) {
+    bool apertada = CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState,
+                                          static_cast<CGKeyCode>(CODIGO_MAC[tecla]));
+    if (tecla == T_ENTER && !apertada) {
+        apertada = CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState,
+                                         static_cast<CGKeyCode>(CODIGO_MAC_ENTER_NUMERICO));
+    }
+    return apertada;
+}
+
+// O sistema so e dado como inutil para uma tecla se, 3 ou mais vezes, o terminal
+// recebeu essa tecla enquanto ele dizia que nao estava apertada, e nenhuma vez
+// concordou. Se isso acontece com todas as teclas juntas (ele nao responde a
+// nenhuma), vale para todas. Fora isso a decisao e tecla a tecla: ele pode
+// responder bem para umas e nao para outras.
+static const int ERROS_PARA_DESISTIR = 3;
+
+static bool usarSistema(const EstadoTeclas& teclas, TeclaVirtual tecla) {
+    int acertos = 0;
+    int erros = 0;
+    for (int i = 0; i < TOTAL_TECLAS; i++) {
+        acertos += teclas.acertosCG[i];
+        erros += teclas.errosCG[i];
+    }
+    bool nenhumaResponde = acertos == 0 && erros >= ERROS_PARA_DESISTIR;
+    bool estaNaoResponde = teclas.acertosCG[tecla] == 0 &&
+                           teclas.errosCG[tecla] >= ERROS_PARA_DESISTIR;
+    return !(nenhumaResponde || estaNaoResponde);
+}
+#endif
 static long long agoraMs() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
                relogio_teclas::now().time_since_epoch()).count();
@@ -64,6 +105,9 @@ static void restaurarTerminal() {
 static void marcar(EstadoTeclas* teclas, TeclaVirtual tecla) {
     teclas->vista[tecla] = true;
     teclas->ultimaVez[tecla] = agoraMs();
+#ifdef __APPLE__
+    if (sistemaApertada(tecla)) teclas->acertosCG[tecla]++; else teclas->errosCG[tecla]++;
+#endif
 }
 
 // Le tudo que chegou ao terminal e atualiza o instante de cada tecla.
@@ -97,6 +141,9 @@ static void lerBytesPendentes(EstadoTeclas* teclas) {
 }
 
 static bool pressionada(const EstadoTeclas& teclas, TeclaVirtual tecla) {
+#ifdef __APPLE__
+    if (usarSistema(teclas, tecla)) return sistemaApertada(tecla);
+#endif
     return teclas.vista[tecla] && agoraMs() - teclas.ultimaVez[tecla] < SEGURAR_MS;
 }
 
@@ -142,6 +189,22 @@ void lerAcoes(EstadoTeclas* anterior, Acoes* acoes) {
     acoes->bomba[1] = apertouAgora(enter, &anterior->bomba[1]);
     acoes->pausa = apertouAgora(p, &anterior->pausa);
     acoes->abandonar = apertouAgora(esc, &anterior->esc);
+}
+
+// Teclas ja seguradas no inicio da rodada nao contam como aperto novo.
+void iniciarTeclas(EstadoTeclas* teclas) {
+    *teclas = {};
+#ifdef JOGO_WINDOWS
+    teclas->bomba[0] = pressionada('F');
+    teclas->bomba[1] = pressionada(VK_RETURN);
+    teclas->pausa = pressionada('P');
+    teclas->esc = pressionada(VK_ESCAPE);
+#elif defined(__APPLE__)
+    teclas->bomba[0] = sistemaApertada(T_F);
+    teclas->bomba[1] = sistemaApertada(T_ENTER);
+    teclas->pausa = sistemaApertada(T_P);
+    teclas->esc = sistemaApertada(T_ESC);
+#endif
 }
 
 #ifdef JOGO_WINDOWS
