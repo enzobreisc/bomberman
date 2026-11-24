@@ -1,30 +1,32 @@
 # Rodar da raiz do projeto. "make jogar" compila e abre o jogo.
 CXX      = c++
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
-CABECALHOS = src/dados/constantes.h src/dados/estruturas.h src/dados/vetor_dinamico.h src/arquivos/mapa.h src/jogo/tempo.h src/jogo/partida.h src/jogo/regras.h
+CABECALHOS = src/dados/constantes.h src/dados/estruturas.h src/dados/vetor_dinamico.h src/arquivos/mapa.h src/jogo/tempo.h src/jogo/partida.h src/jogo/regras.h src/jogo/computador.h
 
 FONTES = src/main.cpp src/interface/menu.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp \
-         src/interface/tela.cpp src/jogo/entrada.cpp src/arquivos/historico.cpp
+         src/interface/tela.cpp src/jogo/entrada.cpp src/arquivos/historico.cpp src/jogo/computador.cpp
 
 FONTES_JOGO = src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp \
               src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp \
-              src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
+              src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp src/jogo/computador.cpp
 
 .PHONY: testes vazamentos verificar-windows jogo jogar limpar
 
-testes: build/teste_vetor build/teste_mapa build/teste_tempo build/teste_regras build/teste_historico
+testes: build/teste_vetor build/teste_mapa build/teste_tempo build/teste_regras build/teste_historico build/teste_computador
 	./build/teste_vetor
 	./build/teste_mapa testes/mapas/*.txt
 	./build/teste_tempo
 	./build/teste_regras
+	./build/teste_computador
 	cd build && ./teste_historico
 
 # Vazamentos de memoria (macOS)
-vazamentos: build/teste_vetor build/teste_mapa build/teste_tempo build/teste_regras build/teste_historico
+vazamentos: build/teste_vetor build/teste_mapa build/teste_tempo build/teste_regras build/teste_historico build/teste_computador
 	leaks --atExit -- ./build/teste_vetor
 	leaks --atExit -- ./build/teste_mapa testes/mapas/*.txt
 	leaks --atExit -- ./build/teste_tempo
 	leaks --atExit -- ./build/teste_regras
+	leaks --atExit -- ./build/teste_computador
 	cd build && leaks --atExit -- ./teste_historico
 
 build/teste_tempo: testes/teste_tempo.cpp src/jogo/tempo.cpp $(CABECALHOS) src/jogo/tempo.h
@@ -34,6 +36,10 @@ build/teste_tempo: testes/teste_tempo.cpp src/jogo/tempo.cpp $(CABECALHOS) src/j
 build/teste_regras: testes/teste_regras.cpp src/jogo/regras.cpp src/jogo/partida.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp $(CABECALHOS)
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) testes/teste_regras.cpp src/jogo/regras.cpp src/jogo/partida.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp -o $@
+
+build/teste_computador: testes/teste_computador.cpp src/jogo/computador.cpp src/jogo/regras.cpp src/jogo/partida.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp $(CABECALHOS)
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) testes/teste_computador.cpp src/jogo/computador.cpp src/jogo/regras.cpp src/jogo/partida.cpp src/arquivos/mapa.cpp src/jogo/tempo.cpp -o $@
 
 build/teste_historico: testes/teste_historico.cpp src/arquivos/historico.cpp $(CABECALHOS) src/arquivos/historico.h
 	@mkdir -p build

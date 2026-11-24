@@ -126,12 +126,27 @@ static int escolherMapa() {
     return escolhido;
 }
 
+// true = jogador 2 e o computador. Repete ate o usuario digitar 1 ou 2.
+static bool escolherContraComputador() {
+    limparTela();
+    mostrarMensagem("MODO DE JOGO\n");
+    mostrarMensagem("1 - Dois jogadores");
+    mostrarMensagem("2 - Jogador contra o computador");
+    mostrarPrompt("\nEscolha: ");
+    while (true) {
+        int opcao = lerNumero();
+        if (opcao == 1 || opcao == 2) return opcao == 2;
+        mostrarPrompt("Opcao invalida. Escolha: ");
+    }
+}
+
 void executarJogar() {
+    bool contraComputador = escolherContraComputador();
     int numero = escolherMapa();
     if (numero == 0) return;
 
     std::string nome1 = pedirNome(1);
-    std::string nome2 = pedirNome(2);
+    std::string nome2 = contraComputador ? NOME_COMPUTADOR : pedirNome(2);
 
     Mapa mapa;
     std::string erro;
@@ -144,6 +159,7 @@ void executarJogar() {
 
     Partida partida;
     iniciarPartida(&partida, &mapa, numero, nome1, nome2);
+    partida.jogadores[1].computador = contraComputador;
 
     bool concluida = jogarPartida(&partida);
     RegistroHistorico registro = criarRegistro(partida);

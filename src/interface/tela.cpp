@@ -157,7 +157,8 @@ void mostrarMenu() {
 void mostrarComoJogar() {
     limparTela();
     std::cout << "COMO JOGAR\n\n"
-              << "Dois jogadores no mesmo teclado. Vence a rodada quem sobrar vivo;\n"
+              << "Dois jogadores no mesmo teclado (ou um jogador contra o computador, que\n"
+              << "controla o jogador 2). Vence a rodada quem sobrar vivo;\n"
               << "se os dois morrerem juntos ou o tempo (" << formatarMMSS(RODADA_MS)
               << ") acabar, e empate.\n"
               << "A partida tem ate " << RODADAS_PARTIDA << " rodadas; quem fizer "

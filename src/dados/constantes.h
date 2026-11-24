@@ -18,7 +18,13 @@ constexpr int RODADAS_PARA_VENCER = RODADAS_PARTIDA / 2 + 1;  // maioria das rod
 // Mapas e nomes
 constexpr int MIN_LINHAS_COLUNAS  = 5;
 constexpr int TAM_NOME_JOGADOR    = 10;
+constexpr const char* NOME_COMPUTADOR = "CPU";  // nome do jogador 2 no modo contra o computador
 constexpr int HISTORICO_RECENTES  = 10;  // partidas mostradas na tela de historico
+
+// Jogador controlado pelo computador
+constexpr int BOMBAS_DO_COMPUTADOR  = 2;  // bombas ativas ao mesmo tempo (o limite das regras e maior)
+constexpr int CUSTO_BLOCO           = 4;  // custo de um bloco no caminho ate o adversario (celula vazia custa 1)
+constexpr int PASSOS_PARA_ESCAPAR   = 8;  // so poe a bomba se sai da cruz em ate 8 passos (1,2 s)
 
 // Teclas acompanhadas no macOS (ver entrada.cpp)
 constexpr int TECLAS_VIRTUAIS     = 12;

@@ -1,5 +1,6 @@
 #include "laco.h"
 #include "../dados/constantes.h"
+#include "computador.h"
 #include "entrada.h"
 #include "partida.h"
 #include "regras.h"
@@ -38,6 +39,9 @@ static bool executarRodada(Partida* partida, int* resultado) {
         atualizarRelogio(&partida->relogio, partida->pausado);
 
         if (!partida->pausado) {
+            for (int i = 0; i < 2; i++) {
+                if (partida->jogadores[i].computador) decidirAcoesComputador(partida, i, &acoes);
+            }
             aplicarAcoes(partida, acoes);
             processarExplosoes(partida);
             apagarChamas(partida);

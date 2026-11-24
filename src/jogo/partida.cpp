@@ -8,6 +8,7 @@ static void iniciarJogador(Jogador* j, const std::string& nome, int linha, int c
     j->linhaInicial = linha;
     j->colunaInicial = coluna;
     j->rodadasVencidas = 0;
+    j->computador = false;
 }
 
 void iniciarPartida(Partida* partida, Mapa* mapa, int numeroMapa,

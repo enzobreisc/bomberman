@@ -24,6 +24,7 @@ struct Jogador {
     int rodadasVencidas;
     int bombasAtivas;
     long long proximoPasso;  // instante (relogio do jogo) do proximo passo
+    bool computador;         // true: as acoes vem de decidirAcoesComputador, nao do teclado
 };
 
 struct Bomba {
