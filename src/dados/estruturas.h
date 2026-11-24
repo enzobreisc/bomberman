@@ -3,6 +3,7 @@
 
 #include <string>
 #include <chrono>
+#include "constantes.h"
 #include "vetor_dinamico.h"
 
 // Arena carregada de um arquivo; celulas sempre em simbolos do formato C.
@@ -43,7 +44,14 @@ struct Chama {
 // Relogio do jogo: so avanca quando nao esta pausado.
 struct Relogio {
     std::chrono::steady_clock::time_point inicioCiclo;
-    long long agoraJogo;  // ms
+    long long agoraJogo;    // ms
+    long long sobraMicros;  // fracao de ms ainda nao somada (evita atraso acumulado)
+};
+
+// Uma celula da arena (usada para os blocos atingidos numa explosao).
+struct Posicao {
+    int linha;
+    int coluna;
 };
 
 // O que cada jogador quer fazer neste ciclo. Direcao: -1, 0 ou 1.
@@ -60,6 +68,10 @@ struct EstadoTeclas {
     bool bomba[2];
     bool pausa;
     bool esc;
+    // So usados no macOS, onde o terminal nao avisa quando a tecla e solta:
+    // instante (ms) da ultima vez que cada tecla chegou e se ja chegou alguma.
+    long long ultimaVez[TECLAS_VIRTUAIS];
+    bool vista[TECLAS_VIRTUAIS];
 };
 
 // Estado de uma partida em andamento.

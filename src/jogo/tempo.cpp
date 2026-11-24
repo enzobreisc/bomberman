@@ -7,14 +7,21 @@ using relogio_real = std::chrono::steady_clock;
 
 void iniciarRelogio(Relogio* relogio) {
     relogio->agoraJogo = 0;
+    relogio->sobraMicros = 0;
     relogio->inicioCiclo = relogio_real::now();
 }
 
+// Mede em microssegundos e guarda a fracao de ms que sobra para o proximo
+// ciclo; descartar essa fracao a cada ciclo fazia o relogio atrasar ~1%.
 void atualizarRelogio(Relogio* relogio, bool pausado) {
     relogio_real::time_point agora = relogio_real::now();
-    long long delta = std::chrono::duration_cast<std::chrono::milliseconds>(
+    long long delta = std::chrono::duration_cast<std::chrono::microseconds>(
                           agora - relogio->inicioCiclo).count();
-    if (!pausado) relogio->agoraJogo += delta;
+    if (!pausado) {
+        relogio->sobraMicros += delta;
+        relogio->agoraJogo += relogio->sobraMicros / 1000;
+        relogio->sobraMicros %= 1000;
+    }
     relogio->inicioCiclo = agora;
 }
 

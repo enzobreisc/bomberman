@@ -114,10 +114,21 @@ construtores). Não há variáveis globais.
 - **Por que existe:** isola o controle de tempo. `agoraJogo` (ms, 64 bits) só
   avança quando o jogo não está pausado; `inicioCiclo` guarda o começo do ciclo
   atual para calcular o delta e para esperar só o que falta até 33 ms.
+  `sobraMicros` guarda a fração de milissegundo que sobrou no ciclo: o delta é
+  medido em microssegundos e só os ms inteiros entram em `agoraJogo`. Descartar
+  essa fração a cada ciclo fazia o relógio do jogo atrasar cerca de 1% (≈1,5 s
+  numa rodada de 2 minutos).
 - **Decisão:** todos os instantes do jogo (pavio, chamas, passos, fim da
   rodada) usam esse relógio, então a pausa congela tudo sem código extra.
   _Alternativa descartada:_ guardar `time_point` do `steady_clock` em cada
   bomba (a pausa exigiria corrigir todos os instantes).
+
+### Posicao
+- **Por que existe:** só uma célula (`linha`, `coluna`). Guarda os blocos
+  atingidos durante uma cadeia de explosões, que só viram vazio no fim da
+  cadeia. _Alternativa descartada:_ reaproveitar `Chama`, que teria um
+  `instanteFim` sem significado. É também um terceiro tipo usado com as
+  funções template do `VetorDinamico`.
 
 ### Acoes e EstadoTeclas
 - **Por que existem:** `lerAcoes` só lê o teclado e preenche `Acoes` (direção
@@ -184,7 +195,7 @@ construtores). Não há variáveis globais.
 | Vetor temporário `int[colunas]` (leitura formato N) | `lerLinhaMapa` | a mesma função, antes de retornar |
 | Cópia do mapa `Partida.celulasIniciais` | `iniciarPartida` (via `copiarCelulas`) | `encerrarPartida` (via `liberarCelulas`) |
 | Vetores `Partida.bombas` e `Partida.chamas` | `iniciarRodada` (`iniciarVetor`) | `encerrarRodada` (`liberarVetor`), ao fim de cada rodada; `encerrarPartida` também chama, para o caso do ESC |
-| Fila da cadeia e lista de blocos destruídos | `processarExplosoes` (vetores locais) | a mesma função, antes de retornar |
+| Fila da cadeia (`VetorDinamico<int>`) e blocos destruídos (`VetorDinamico<Posicao>`) | `processarExplosoes` (vetores locais) | a mesma função, antes de retornar |
 | Vetor `bool validos[]` da lista de mapas | `escolherMapa` (menu.cpp) | a mesma função |
 | Vetor de `RegistroHistorico` | `carregarHistorico` (tamanho exato) | `liberarHistorico`, chamada em `executarHistorico` |
 

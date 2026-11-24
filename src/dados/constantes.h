@@ -19,6 +19,9 @@ constexpr int RODADAS_PARA_VENCER = 2;
 constexpr int MIN_LINHAS_COLUNAS  = 5;
 constexpr int TAM_NOME_JOGADOR    = 10;
 
+// Teclas acompanhadas no macOS (ver entrada.cpp)
+constexpr int TECLAS_VIRTUAIS     = 12;
+
 // Capacidade inicial dos vetores dinamicos
 constexpr int CAPACIDADE_INICIAL  = 2;
 
