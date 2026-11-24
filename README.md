@@ -14,7 +14,7 @@ C++ para o terminal (Windows ou macOS), sem bibliotecas gráficas.
 src/main.cpp
 src/dados/       constantes, structs, vetor dinâmico (template) e plataforma.h
                  (escolhe o código de teclado e tela: Windows ou macOS/Linux)
-src/jogo/        regras, partida, laço, relógio e teclado
+src/jogo/        regras, partida, laço, relógio, teclado e jogador controlado pelo computador
 src/arquivos/    leitura de mapas e histórico.csv
 src/interface/   tela e menu
 testes/          testes portáveis, mapas de teste e declarações falsas do Windows
@@ -38,7 +38,7 @@ funcionar bem; segurar duas teclas costuma repetir só a última. Bombas, pausa
 No **Windows** (`conio.h` e `windows.h`, g++/MinGW):
 
 ```
-g++ -std=c++17 -o bomberman.exe src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp
+g++ -std=c++17 -o bomberman.exe src/main.cpp src/jogo/laco.cpp src/jogo/partida.cpp src/jogo/regras.cpp src/jogo/tempo.cpp src/jogo/entrada.cpp src/arquivos/mapa.cpp src/arquivos/historico.cpp src/interface/menu.cpp src/interface/tela.cpp src/jogo/computador.cpp
 bomberman.exe
 ```
 
@@ -91,11 +91,13 @@ construtores). Não há variáveis globais.
 - **Campos:** `nome`; `linha`/`coluna` (posição atual); `linhaInicial`/
   `colunaInicial` (para reiniciar a rodada); `vivo` (`bool`); `rodadasVencidas`;
   `bombasAtivas`; `proximoPasso` (`long long`, instante no relógio do jogo em
-  que ele poderá andar de novo).
+  que ele poderá andar de novo); `computador` (`bool`: as ações vêm de
+  `decidirAcoesComputador` em vez do teclado).
 - **Calculado, não guardado:** quantas bombas ele ainda pode colocar
   (`BOMBAS_POR_JOGADOR - bombasAtivas`).
 - **Decisão:** `proximoPasso` por jogador faz com que um jogador parado não
-  atrase o outro.
+  atrase o outro. `computador` fica no jogador (e não na `Partida`) para que
+  qualquer um dos dois possa ser controlado pelo programa, sem mudar o laço.
 
 ### Bomba
 - **Por que existe:** cada bomba ativa na arena.
@@ -130,6 +132,23 @@ construtores). Não há variáveis globais.
   cadeia. _Alternativa descartada:_ reaproveitar `Chama`, que teria um
   `instanteFim` sem significado. É também um terceiro tipo usado com as
   funções template do `VetorDinamico`.
+
+### Campo (`computador.cpp`, interna a esse arquivo)
+- **Por que existe:** reúne a memória de trabalho de uma decisão do computador:
+  vetores com um valor por célula da arena (células em chamas, alvos da busca,
+  tempo até a explosão, fila e distâncias da busca, custo até o adversário).
+  Passar uma `Campo*` evita funções com meia dúzia de ponteiros.
+- **Campos:** `total` (células da arena) e ponteiros para fatias de dois blocos
+  alocados juntos: `marcas` (`bool`) e `numeros` (`int`). Os tamanhos dependem do
+  mapa, que tem tamanho qualquer, então não há como ser vetor fixo.
+- **Decisão:** um `new` por tipo, cortado em fatias, em vez de um `new` por vetor
+  (menos chances de esquecer um `delete`). _Alternativas descartadas:_ guardar
+  essa memória em `Partida` (seria estado do jogo, mas é só rascunho da decisão)
+  e um mapa de custos persistente entre ciclos (obrigaria a invalidá-lo a cada
+  bomba, bloco destruído ou passo). Alocar a cada decisão custa pouco e a
+  arena pode ter qualquer tamanho.
+- **Calculado, não guardado:** nada disso vai para `Partida`; some quando a
+  decisão termina.
 
 ### Acoes e EstadoTeclas
 - **Por que existem:** `lerAcoes` só lê o teclado e preenche `Acoes` (direção
@@ -197,6 +216,8 @@ construtores). Não há variáveis globais.
 | Cópia do mapa `Partida.celulasIniciais` | `iniciarPartida` (via `copiarCelulas`) | `encerrarPartida` (via `liberarCelulas`) |
 | Vetores `Partida.bombas` e `Partida.chamas` | `iniciarRodada` (`iniciarVetor`) | `encerrarRodada` (`liberarVetor`), ao fim de cada rodada; `encerrarPartida` também chama, para o caso do ESC |
 | Fila da cadeia (`VetorDinamico<int>`) e blocos destruídos (`VetorDinamico<Posicao>`) | `processarExplosoes` (vetores locais) | a mesma função, antes de retornar |
+| `Campo.marcas` e `Campo.numeros` (computador) | `criarCampo`, chamada por `decidirAcoesComputador` | `liberarCampo`, no fim da mesma decisão |
+| `lista` e `restante` (bombas e tempos da cadeia) | `calcularTempos` | a mesma função, antes de retornar |
 | Vetor `bool validos[]` da lista de mapas | `escolherMapa` (menu.cpp) | a mesma função |
 | Vetor de `RegistroHistorico` | `carregarHistorico` (tamanho exato) | `liberarHistorico`, chamada em `executarHistorico` |
 
@@ -361,7 +382,34 @@ Letras `C` e `N` na primeira linha do arquivo de mapa (`FORMATO_C` /
 
 ## (f) Desafios extras
 
-Nenhum desafio extra foi implementado nesta versão final.
+**Adversário controlado pelo computador.** Em "Jogar" o menu pergunta o modo:
+dois jogadores, ou jogador contra o computador (o jogador 2 passa a se chamar
+`CPU` no histórico). O jogador 1 continua no teclado.
+
+- `computador.cpp` tem uma única função pública, `decidirAcoesComputador`.
+  Como `lerAcoes` faz com o teclado, ela só olha a partida (recebida por
+  ponteiro para `const`) e preenche `Acoes` desse jogador: não altera nada, não
+  imprime e não acessa arquivo. Quem aplica a ação é o laço, com as mesmas
+  regras dos humanos (`moverJogador` ainda respeita o intervalo de 150 ms entre
+  passos e `colocarBomba` o limite de bombas).
+- **Estratégia, por prioridade:** (1) se a célula está no alcance de uma bomba,
+  foge para a célula segura mais próxima, só entrando em células que ainda não
+  explodiram quando ele chegar; (2) se uma bomba ali atinge o adversário (ou um
+  bloco que está no caminho dele) e dá tempo de sair da cruz, coloca a bomba;
+  (3) senão anda em direção ao adversário pelo caminho mais barato (célula
+  vazia custa 1, bloco custa `CUSTO_BLOCO`).
+- **Tempo da explosão:** para cada célula, calcula em quantos ms alguma bomba a
+  atinge, contando a cadeia (uma bomba atingida explode junto com a que a
+  atingiu). Assim o computador não põe uma bomba nova quando a fuga passaria
+  por uma bomba antiga prestes a explodir.
+- **Memória:** os vetores de trabalho (um valor por célula da arena, tamanho
+  qualquer) são alocados no início de `decidirAcoesComputador` e liberados no
+  fim dela, em um único bloco para cada tipo (`criarCampo` / `liberarCampo`).
+- **Limites de projeto:** usa no máximo `BOMBAS_DO_COMPUTADOR` bombas ao mesmo
+  tempo e só coloca a bomba se escapa em até `PASSOS_PARA_ESCAPAR` passos.
+  `testes/teste_computador.cpp` confere a fuga, a bomba perto do adversário, a
+  recusa sem saída e simula rodadas inteiras em seis mapas: o computador nunca
+  morre sozinho e elimina um adversário parado.
 
 ## Integrantes
 
