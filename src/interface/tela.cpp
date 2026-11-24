@@ -158,8 +158,10 @@ void mostrarComoJogar() {
     limparTela();
     std::cout << "COMO JOGAR\n\n"
               << "Dois jogadores no mesmo teclado. Vence a rodada quem sobrar vivo;\n"
-              << "se os dois morrerem juntos ou o tempo (2 minutos) acabar, e empate.\n"
-              << "A partida tem ate 3 rodadas; quem fizer 2 vitorias vence.\n\n"
+              << "se os dois morrerem juntos ou o tempo (" << formatarMMSS(RODADA_MS)
+              << ") acabar, e empate.\n"
+              << "A partida tem ate " << RODADAS_PARTIDA << " rodadas; quem fizer "
+              << RODADAS_PARA_VENCER << " vitorias vence.\n\n"
               << "Jogador 1: W A S D move, F coloca bomba\n"
               << "Jogador 2: setas movem, Enter coloca bomba\n"
               << "P pausa e continua, ESC abandona (com confirmacao)\n\n"
@@ -189,10 +191,14 @@ void mostrarMensagem(const std::string& texto) {
     std::cout << texto << "\n" << std::flush;
 }
 
+void mostrarPrompt(const std::string& texto) {
+    std::cout << texto << std::flush;
+}
+
 void mostrarHistorico(const RegistroHistorico* registros, int total) {
     limparTela();
-    std::cout << "HISTORICO (10 partidas mais recentes)\n\n";
-    int inicio = total > 10 ? total - 10 : 0;
+    std::cout << "HISTORICO (" << HISTORICO_RECENTES << " partidas mais recentes)\n\n";
+    int inicio = total > HISTORICO_RECENTES ? total - HISTORICO_RECENTES : 0;
     for (int i = total - 1; i >= inicio; i--) {
         const RegistroHistorico& r = registros[i];
         std::cout << r.nome1 << " " << r.vitorias1 << " x " << r.vitorias2 << " " << r.nome2

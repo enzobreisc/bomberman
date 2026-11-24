@@ -22,6 +22,8 @@ void mostrarComoJogar();
 void mostrarSobre();
 void mostrarOpcaoMapa(int numero, const std::string& texto, bool disponivel);
 void mostrarMensagem(const std::string& texto);
+// Texto sem quebra de linha, para pedir uma entrada.
+void mostrarPrompt(const std::string& texto);
 void mostrarHistorico(const RegistroHistorico* registros, int total);
 
 #endif

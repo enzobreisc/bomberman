@@ -4,11 +4,11 @@
 #include <string>
 #include "../dados/estruturas.h"
 
-// Carrega o mapa e aloca tudo que a partida usa. Em caso de erro devolve false,
-// escreve o motivo em 'erro' e nao deixa nada alocado.
-bool iniciarPartida(Partida* partida, const std::string& caminhoMapa, int numeroMapa,
-                    const std::string& nome1, const std::string& nome2,
-                    std::string* erro);
+// Monta a partida a partir de um mapa ja carregado (nao acessa arquivo). A partida
+// passa a ser dona da matriz do mapa: 'mapa' fica vazio e quem chamou deve
+// chamar encerrarPartida, nao liberarMapa.
+void iniciarPartida(Partida* partida, Mapa* mapa, int numeroMapa,
+                    const std::string& nome1, const std::string& nome2);
 
 // Volta o mapa ao estado inicial, aloca bombas e chamas novos e recoloca os jogadores.
 void iniciarRodada(Partida* partida);

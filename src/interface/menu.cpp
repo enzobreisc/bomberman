@@ -11,6 +11,9 @@
 #include "../jogo/partida.h"
 #include "tela.h"
 
+// O menu so le a escolha do usuario; tudo que aparece na tela passa por tela.cpp
+// e tudo que vem de arquivo por mapa.cpp / historico.cpp.
+
 static bool lerLinha(std::string* linha) {
     esvaziarTeclado();
     if (!std::getline(std::cin, *linha)) {
@@ -46,11 +49,58 @@ static bool nomeValido(const std::string& nome) {
 static std::string pedirNome(int numeroJogador) {
     std::string nome;
     while (true) {
-        std::cout << "Nome do jogador " << numeroJogador << " (ate " << TAM_NOME_JOGADOR
-                  << " caracteres, sem virgula e sem espaco): " << std::flush;
+        mostrarPrompt("Nome do jogador " + std::to_string(numeroJogador) + " (ate " +
+                      std::to_string(TAM_NOME_JOGADOR) + " caracteres, sem virgula e sem espaco): ");
         lerLinha(&nome);
         if (nomeValido(nome)) return nome;
         mostrarMensagem("Nome invalido.");
+    }
+}
+
+static void esperarEnter() {
+    std::string espera;
+    lerLinha(&espera);
+}
+
+// Preenche validos[i] e mostra a lista; devolve quantos mapas sao validos.
+static int listarMapas(int total, bool* validos) {
+    int quantosValidos = 0;
+    limparTela();
+    mostrarMensagem("MAPAS\n");
+    for (int i = 0; i < total; i++) {
+        std::string titulo;
+        std::string erro;
+        validos[i] = consultarMapa(i + 1, &titulo, &erro);
+        if (validos[i]) {
+            mostrarOpcaoMapa(i + 1, titulo, true);
+            quantosValidos++;
+        } else {
+            mostrarOpcaoMapa(i + 1, nomeArquivoMapa(i + 1) + ": " + erro, false);
+        }
+    }
+    return quantosValidos;
+}
+
+// Numero (1..total) de um dos mapas validos, sorteado.
+static int sortearMapaValido(int total, const bool* validos, int quantosValidos) {
+    std::mt19937 gerador(static_cast<unsigned>(
+        std::chrono::steady_clock::now().time_since_epoch().count()));
+    int sorteado = static_cast<int>(gerador() % quantosValidos);
+    for (int i = 0; i < total; i++) {
+        if (validos[i] && sorteado-- == 0) return i + 1;
+    }
+    return 0;
+}
+
+// Repete ate o usuario escolher um mapa valido ou pedir o sorteio (0).
+static int lerEscolhaMapa(int total, const bool* validos, int quantosValidos) {
+    mostrarMensagem("\n0 - Sortear um mapa valido");
+    mostrarPrompt("Escolha: ");
+    while (true) {
+        int opcao = lerNumero();
+        if (opcao == 0) return sortearMapaValido(total, validos, quantosValidos);
+        if (opcao > 0 && opcao <= total && validos[opcao - 1]) return opcao;
+        mostrarPrompt("Opcao invalida. Escolha: ");
     }
 }
 
@@ -63,45 +113,14 @@ static int escolherMapa() {
     }
 
     bool* validos = new bool[total];
-    int quantosValidos = 0;
-    limparTela();
-    mostrarMensagem("MAPAS\n");
-    for (int i = 0; i < total; i++) {
-        Mapa mapa;
-        std::string erro;
-        validos[i] = carregarMapa(nomeArquivoMapa(i + 1), &mapa, &erro);
-        if (validos[i]) {
-            mostrarOpcaoMapa(i + 1, mapa.titulo, true);
-            liberarMapa(&mapa);
-            quantosValidos++;
-        } else {
-            mostrarOpcaoMapa(i + 1, nomeArquivoMapa(i + 1) + ": " + erro, false);
-        }
-    }
+    int quantosValidos = listarMapas(total, validos);
 
     int escolhido = 0;
     if (quantosValidos == 0) {
         mostrarMensagem("\nNenhum mapa valido. Pressione ENTER para voltar.");
-        std::string espera;
-        lerLinha(&espera);
+        esperarEnter();
     } else {
-        mostrarMensagem("\n0 - Sortear um mapa valido");
-        std::cout << "Escolha: " << std::flush;
-        while (escolhido == 0) {
-            int opcao = lerNumero();
-            if (opcao == 0) {
-                std::mt19937 gerador(static_cast<unsigned>(
-                    std::chrono::steady_clock::now().time_since_epoch().count()));
-                int sorteado = static_cast<int>(gerador() % quantosValidos);
-                for (int i = 0; i < total; i++) {
-                    if (validos[i] && sorteado-- == 0) escolhido = i + 1;
-                }
-            } else if (opcao > 0 && opcao <= total && validos[opcao - 1]) {
-                escolhido = opcao;
-            } else {
-                std::cout << "Opcao invalida. Escolha: " << std::flush;
-            }
-        }
+        escolhido = lerEscolhaMapa(total, validos, quantosValidos);
     }
     delete[] validos;
     return escolhido;
@@ -114,15 +133,17 @@ void executarJogar() {
     std::string nome1 = pedirNome(1);
     std::string nome2 = pedirNome(2);
 
-    Partida partida;
+    Mapa mapa;
     std::string erro;
-    if (!iniciarPartida(&partida, nomeArquivoMapa(numero), numero, nome1, nome2, &erro)) {
+    if (!carregarMapa(nomeArquivoMapa(numero), &mapa, &erro)) {
         mostrarMensagem("Nao foi possivel carregar o mapa: " + erro);
         mostrarMensagem("Pressione ENTER para voltar.");
-        std::string espera;
-        lerLinha(&espera);
+        esperarEnter();
         return;
     }
+
+    Partida partida;
+    iniciarPartida(&partida, &mapa, numero, nome1, nome2);
 
     bool concluida = jogarPartida(&partida);
     RegistroHistorico registro = criarRegistro(partida);

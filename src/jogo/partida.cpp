@@ -10,10 +10,12 @@ static void iniciarJogador(Jogador* j, const std::string& nome, int linha, int c
     j->rodadasVencidas = 0;
 }
 
-bool iniciarPartida(Partida* partida, const std::string& caminhoMapa, int numeroMapa,
-                    const std::string& nome1, const std::string& nome2,
-                    std::string* erro) {
-    if (!carregarMapa(caminhoMapa, &partida->mapa, erro)) return false;
+void iniciarPartida(Partida* partida, Mapa* mapa, int numeroMapa,
+                    const std::string& nome1, const std::string& nome2) {
+    partida->mapa = *mapa;
+    mapa->celulas = nullptr;
+    mapa->linhas = 0;
+    mapa->colunas = 0;
 
     int linha1 = 0, coluna1 = 0, linha2 = 0, coluna2 = 0;
     extrairPosicoesIniciais(&partida->mapa, &linha1, &coluna1, &linha2, &coluna2);
@@ -28,7 +30,6 @@ bool iniciarPartida(Partida* partida, const std::string& caminhoMapa, int numero
     partida->numeroRodada = 0;
     partida->numeroMapa = numeroMapa;
     partida->instanteInicioRodada = 0;
-    return true;
 }
 
 void iniciarRodada(Partida* partida) {

@@ -13,11 +13,12 @@ constexpr long long TOLERANCIA_MS = 100;
 constexpr int ALCANCE_BOMBA       = 2;
 constexpr int BOMBAS_POR_JOGADOR  = 3;
 constexpr int RODADAS_PARTIDA     = 3;
-constexpr int RODADAS_PARA_VENCER = 2;
+constexpr int RODADAS_PARA_VENCER = RODADAS_PARTIDA / 2 + 1;  // maioria das rodadas
 
 // Mapas e nomes
 constexpr int MIN_LINHAS_COLUNAS  = 5;
 constexpr int TAM_NOME_JOGADOR    = 10;
+constexpr int HISTORICO_RECENTES  = 10;  // partidas mostradas na tela de historico
 
 // Teclas acompanhadas no macOS (ver entrada.cpp)
 constexpr int TECLAS_VIRTUAIS     = 12;

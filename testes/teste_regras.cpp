@@ -1,5 +1,6 @@
 // Etapas 6 e 7: movimento, bombas, explosao, cadeia, chamas e mortes.
 #include <iostream>
+#include "../src/arquivos/mapa.h"
 #include "../src/jogo/partida.h"
 #include "../src/jogo/regras.h"
 
@@ -15,11 +16,13 @@ static int falhas = 0;
 
 static void iniciar(Partida* p) {
     std::string erro;
-    bool ok = iniciarPartida(p, "testes/regras/mapa_7x9.txt", 1, "ana", "bia", &erro);
-    if (!ok) {
+    Mapa mapa;
+    if (!carregarMapa("testes/regras/mapa_7x9.txt", &mapa, &erro)) {
         std::cout << "nao abriu o mapa de teste: " << erro << "\n";
         falhas++;
+        return;
     }
+    iniciarPartida(p, &mapa, 1, "ana", "bia");
     iniciarRodada(p);
 }
 
@@ -102,12 +105,38 @@ static void testarParedeEBloco() {
     VERIFICA(!temChama(p, 0, 1));                          // parede nao e atingida
     VERIFICA(temChama(p, 1, 3));                           // bloco atingido
     VERIFICA(!temChama(p, 1, 4));                          // e interrompe
-    VERIFICA(p.mapa.celulas[1][3] == CEL_VAZIO);
     VERIFICA(!temChama(p, 4, 1));                          // alcance 2
 
-    p.relogio.agoraJogo += CHAMA_MS;
+    // O bloco continua no mapa (e barra a passagem) enquanto a chama durar.
+    VERIFICA(p.mapa.celulas[1][3] == CEL_BLOCO);
+    p.relogio.agoraJogo += CHAMA_MS - 1;
+    apagarChamas(&p);
+    VERIFICA(p.mapa.celulas[1][3] == CEL_BLOCO && temChama(p, 1, 3));
+
+    // So quando as chamas se apagam o bloco vira vazio.
+    p.relogio.agoraJogo += 1;
     apagarChamas(&p);
     VERIFICA(p.chamas.quantidade == 0);
+    VERIFICA(p.mapa.celulas[1][3] == CEL_VAZIO);
+    encerrarPartida(&p);
+}
+
+static void testarPavio() {
+    Partida p;
+    iniciar(&p);
+    posicionar(&p, 0, 3, 3);
+    colocarBomba(&p, 0);
+    posicionar(&p, 0, 5, 1);
+
+    // Avanca ciclo a ciclo: explode no pavio, com erro menor que a tolerancia.
+    long long instante = 0;
+    while (p.bombas.quantidade > 0 && instante < 2 * PAVIO_MS) {
+        instante += CICLO_MS;
+        p.relogio.agoraJogo = instante;
+        processarExplosoes(&p);
+    }
+    VERIFICA(p.bombas.quantidade == 0);
+    VERIFICA(instante >= PAVIO_MS && instante - PAVIO_MS <= TOLERANCIA_MS);
     encerrarPartida(&p);
 }
 
@@ -185,6 +214,7 @@ int main() {
     testarMovimento();
     testarBombas();
     testarParedeEBloco();
+    testarPavio();
     testarCadeia();
     testarMortes();
     testarTempoEsgotado();
