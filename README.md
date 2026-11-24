@@ -4,7 +4,8 @@ Trabalho M3 - Algoritmos e Programação II (22817)
 Universidade do Vale do Itajaí - Escola Politécnica - Ciência da Computação
 
 Jogo de Bomberman para dois jogadores no mesmo teclado, em tempo real, feito em
-C++ para o terminal (Windows ou macOS), sem bibliotecas gráficas.
+C++ para o terminal do Windows, sem bibliotecas gráficas. (A versão para macOS
+está na branch `macbook`.)
 
 ## (a) Como compilar e executar
 
@@ -20,19 +21,6 @@ testes/          testes portáveis, mapas de teste e declarações falsas do Win
 mapaN.txt        mapas (na raiz, a pasta de execução)
 README.md, Makefile
 ```
-
-No **macOS** (Xcode Command Line Tools: `xcode-select --install`), na pasta do
-projeto (onde ficam os `mapaN.txt`):
-
-```
-make jogar
-```
-
-No macOS o terminal não avisa quando uma tecla é solta: uma tecla vale como
-"segurada" por 120 ms depois da última vez que chegou (o auto-repeat do sistema
-mantém o movimento). Por isso dois jogadores andando ao mesmo tempo podem não
-funcionar bem; segurar duas teclas costuma repetir só a última. Bombas, pausa
-(P) e abandonar (Esc) funcionam normalmente.
 
 No **Windows** (`conio.h` e `windows.h`, g++/MinGW):
 
@@ -226,7 +214,7 @@ Arquivo (`mapaN.txt`): primeira linha `L C formato` (`C` = caracteres,
   célula vazia e devolve as posições (que ficam guardadas em `Jogador`).
 - **Testes:** `make testes` roda `testes/teste_mapa.cpp` com mapas válidos e
   inválidos de `testes/mapas/` (inclusive 5x5, 25x60, CRLF, vazio e quebrados
-  de cada tipo). `make vazamentos` confirma 0 vazamentos no macOS.
+  de cada tipo). `make vazamentos` (só no macOS, usa `leaks`) confirma 0 vazamentos.
 - **Formato C:** os símbolos de uma linha vêm juntos, sem separador (como no
   enunciado); o `>>` sobre `char` também aceita separados por espaço.
 - `mapa1.txt` e `mapa2.txt` são os exemplos do enunciado (11x13, C e N).

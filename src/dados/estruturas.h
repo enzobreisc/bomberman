@@ -68,7 +68,7 @@ struct EstadoTeclas {
     bool bomba[2];
     bool pausa;
     bool esc;
-    // So usados no macOS, onde o terminal nao avisa quando a tecla e solta:
+    // So usados fora do Windows (macOS/Linux), onde o terminal nao avisa quando a tecla e solta:
     // instante (ms) da ultima vez que cada tecla chegou e se ja chegou alguma.
     long long ultimaVez[TECLAS_VIRTUAIS];
     bool vista[TECLAS_VIRTUAIS];

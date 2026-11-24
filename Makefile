@@ -52,7 +52,7 @@ verificar-windows:
 	@for f in $(FONTES); do $(CXX) $(CXXFLAGS) -DJOGO_WINDOWS -Itestes/stub -fsyntax-only $$f || exit 1; done
 	@echo "sintaxe ok"
 
-# Jogo completo. No macOS/Linux gera ./bomberman (usa termios e ANSI).
+# Jogo completo. Nesta branch so compila no Windows; a versao para macOS esta na branch macbook.
 # No Windows (MinGW) gera bomberman.exe (usa windows.h e conio.h).
 ifeq ($(OS),Windows_NT)
 EXECUTAVEL = bomberman.exe
