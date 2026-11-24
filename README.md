@@ -12,7 +12,8 @@ C++ para o terminal (Windows ou macOS), sem bibliotecas gráficas.
 
 ```
 src/main.cpp
-src/dados/       constantes, structs e vetor dinâmico (template)
+src/dados/       constantes, structs, vetor dinâmico (template) e plataforma.h
+                 (escolhe o código de teclado e tela: Windows ou macOS/Linux)
 src/jogo/        regras, partida, laço, relógio e teclado
 src/arquivos/    leitura de mapas e histórico.csv
 src/interface/   tela e menu
@@ -274,8 +275,10 @@ Nenhuma função de `regras.cpp` imprime, lê arquivo ou espera.
   histórico. Fim de partida: 2 rodadas vencidas ou 3 rodadas disputadas.
 - **Tela** (`tela.cpp`): cada quadro é montado em uma `std::string` (uma letra
   por célula, linhas completadas com espaços) e impresso de uma vez após
-  `SetConsoleCursorPosition(0,0)`, com o cursor oculto. `system("cls")` só é
-  usado em trocas de tela, nunca dentro do laço.
+  mover o cursor para o início (`SetConsoleCursorPosition(0,0)` no Windows,
+  `\033[H` no macOS/Linux), com o cursor oculto. Limpar a tela (`system("cls")`
+  no Windows, `\033[2J` no macOS/Linux) só é usado em trocas de tela, nunca
+  dentro do laço.
 - **Histórico** (`historico.cpp`): `historico.csv` com
   `nome1,nome2,mapa,vitorias1,vitorias2,segundos`, em que `mapa` é o número do
   mapa (ex.: `Ana,Bruno,1,2,0,171`). A primeira passada conta só as linhas
